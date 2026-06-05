@@ -126,6 +126,8 @@ npm run build
 
 Repo-то има `Dockerfile` и `render.yaml`, подготвени за Render Blueprint deploy. В този вариант Spring Boot сервира готовия Vue build и API-то от един домейн, а PostgreSQL е отделна managed база.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/HristoManov91/kids-game)
+
 Приложението пак логически има две части:
 
 - backend service: Spring Boot + PostgreSQL
