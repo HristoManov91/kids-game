@@ -40,6 +40,28 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/",
+                                "/index.html",
+                                "/assets/**",
+                                "/favicon.ico",
+                                "/vite.svg",
+                                "/login",
+                                "/register",
+                                "/app",
+                                "/alphabet",
+                                "/numbers",
+                                "/report",
+                                "/rewards/album",
+                                "/rewards/album/new",
+                                "/admin/monitoring",
+                                "/admin/catalog",
+                                "/admin/reward-catalog",
+                                "/quiz/*",
+                                "/result/*",
+                                "/rewards/album/*",
+                                "/admin/monitoring/attempts/*"
+                        ).permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
                         .requestMatchers("/api/reward-assets/**").permitAll()
