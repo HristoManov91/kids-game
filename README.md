@@ -1,3 +1,14 @@
+---
+title: Kids Game
+emoji: 🧮
+colorFrom: green
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # Kids Game
 
 Детско приложение за упражнения по математика, български и логика. Идеята е проста: детето решава кратки тестове, печели кристали и с тях си прави собствени картинки в албум с награди.
