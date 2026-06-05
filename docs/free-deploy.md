@@ -2,15 +2,14 @@
 
 Този проект има backend, frontend и PostgreSQL база. Затова чистият безплатен вариант е да разделим нещата:
 
-- Koyeb free instance за приложението
-- Supabase или Neon free PostgreSQL за базата
+- Hugging Face Docker Space за приложението
+- Neon Free PostgreSQL за базата
 
 ## 1. Създай Безплатна PostgreSQL База
 
-Избери едно:
+Използвай Neon Free. Free планът е $0 и е описан като без кредитна карта.
 
-- Supabase Free: създай project и вземи PostgreSQL connection string
-- Neon Free: създай project и вземи pooled PostgreSQL connection string
+Създай project и вземи pooled PostgreSQL connection string.
 
 Connection string-ът обикновено изглежда така:
 
@@ -20,13 +19,19 @@ postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
 
 Не го записвай в Git.
 
-## 2. Deploy В Koyeb
+## 2. Създай Hugging Face Space
 
-Отвори бутона:
+Отвори:
 
-[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&builder=dockerfile&repository=github.com/HristoManov91/kids-game&branch=main&name=kids-game&ports=8080;http;/)
+[https://huggingface.co/new-space](https://huggingface.co/new-space)
 
-В Koyeb избери free instance и добави тези environment променливи:
+Настройки:
+
+- Space SDK: Docker
+- Hardware: free CPU
+- App port: `7860`
+
+В Settings -> Secrets добави:
 
 ```bash
 DB_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
@@ -35,10 +40,12 @@ APP_DEMO_SEED_ENABLED=false
 APP_TOKEN_TTL_HOURS=12
 ```
 
-Остави порт `8080`.
+## 3. Качи Кода В Space-а
 
-## 3. След Deploy
+Hugging Face Space е Git repo. След като създадеш Space-а, можеш да го clone-неш и да push-неш този проект към него. Най-удобно е през token от Hugging Face Settings -> Access Tokens.
 
-Отвори публичния Koyeb URL. При чиста база няма готов потребител, така че първо създай акаунт от регистрацията.
+## 4. След Deploy
+
+Отвори публичния Hugging Face Space URL. При чиста база няма готов потребител, така че първо създай акаунт от регистрацията.
 
 Free плановете са подходящи за проба и споделяне с приятели. Ако приложението започне да се използва постоянно, очаквай ограничения като sleep/pause или лимити на база/трафик.

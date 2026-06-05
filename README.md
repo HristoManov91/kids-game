@@ -124,20 +124,20 @@ npm run build
 
 ## Deploy
 
-Няма Render deploy конфигурация в repo-то, за да не те води към платена база по невнимание.
+Няма Render или Koyeb deploy конфигурация в repo-то, за да не те води към платен план или карта по невнимание.
 
-[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&builder=dockerfile&repository=github.com/HristoManov91/kids-game&branch=main&name=kids-game&ports=8080;http;/)
+[Hugging Face Spaces](https://huggingface.co/new-space) е по-подходящият безплатен вариант за приложението, защото Docker Spaces могат да стартират custom web app без кредитна карта. За базата използвай [Neon Free](https://neon.com/pricing), защото Free планът им е $0 и е описан като без кредитна карта.
 
 Безплатният вариант, който има най-много смисъл за този проект:
 
-- Koyeb free instance за приложението
-- Supabase или Neon free PostgreSQL за базата
+- Hugging Face Docker Space за приложението
+- Neon Free PostgreSQL за базата
 
-В Koyeb трябва да добавиш тези environment променливи преди deploy:
+В Hugging Face Space настрой `sdk: docker`, порт `7860`, и добави тези Secrets:
 
 | Key | Value |
 | --- | --- |
-| `DB_URL` | connection string от Supabase/Neon |
+| `DB_URL` | connection string от Neon |
 | `APP_JWT_SECRET` | дълга случайна стойност |
 | `APP_DEMO_SEED_ENABLED` | `false` |
 | `APP_TOKEN_TTL_HOURS` | `12` |
