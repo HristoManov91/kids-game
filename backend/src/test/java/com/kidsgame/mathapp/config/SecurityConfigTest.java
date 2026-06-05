@@ -98,6 +98,14 @@ class SecurityConfigTest {
     }
 
     @Test
+    void allowsHuggingFaceToFrameSpaShell() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(header().doesNotExist("X-Frame-Options"))
+                .andExpect(header().string("Content-Security-Policy", "frame-ancestors 'self' https://huggingface.co"));
+    }
+
+    @Test
     void allowsAuthenticatedUsersToReadRewardCatalog() throws Exception {
         mockMvc.perform(get("/api/rewards/catalog").with(user(principal("mila", Role.CHILD))))
                 .andExpect(status().isOk());
