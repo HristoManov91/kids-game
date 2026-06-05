@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Optional;
@@ -84,6 +86,15 @@ class SecurityConfigTest {
     void protectsRewardCatalogFromAnonymousUsers() throws Exception {
         mockMvc.perform(get("/api/rewards/catalog"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void servesSpaShellToAnonymousUsers() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/login"))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -151,8 +162,10 @@ class SecurityConfigTest {
     @Import({
             SecurityConfig.class,
             ApiExceptionHandler.class,
+            SpaForwardController.class,
             RewardAlbumController.class,
-            AdminRewardCatalogController.class
+            AdminRewardCatalogController.class,
+            StaticIndexController.class
     })
     static class TestConfig {
         @Bean
@@ -183,6 +196,14 @@ class SecurityConfigTest {
         @Bean
         AdminRewardCatalogService adminRewardCatalogService() {
             return mock(AdminRewardCatalogService.class);
+        }
+    }
+
+    @RestController
+    static class StaticIndexController {
+        @GetMapping("/index.html")
+        String index() {
+            return "app";
         }
     }
 }
