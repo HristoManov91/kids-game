@@ -128,6 +128,15 @@ Repo-то има `Dockerfile` и `render.yaml`, подготвени за Render
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/HristoManov91/kids-game)
 
+`render.yaml` е настроен изрично на `free`, за да не избере Render платен план по подразбиране. Важно: Render free web service може да заспива при липса на трафик, а Render free PostgreSQL има времеви лимит. Това е ок за проба и споделяне с приятели, но не е мястото за важни production данни.
+
+Ако искаш по-дълъг безплатен вариант за базата, използвай free PostgreSQL от Supabase или Neon и сложи техния connection string в `DB_URL`. Backend-ът приема и двата формата:
+
+```bash
+jdbc:postgresql://...
+postgresql://...
+```
+
 Приложението пак логически има две части:
 
 - backend service: Spring Boot + PostgreSQL
