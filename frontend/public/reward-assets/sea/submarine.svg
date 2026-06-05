@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 120" role="img" aria-label="Submarine">
+  <path d="M82 34V15h32v19" fill="none" stroke="#93651d" stroke-width="8" stroke-linecap="round"/>
+  <ellipse cx="96" cy="67" rx="73" ry="34" fill="#ffd34f" stroke="#93651d" stroke-width="6"/>
+  <circle cx="73" cy="64" r="14" fill="#9be8ff" stroke="#93651d" stroke-width="5"/><circle cx="113" cy="64" r="14" fill="#9be8ff" stroke="#93651d" stroke-width="5"/>
+  <path d="M21 67L6 50v34zM169 67l16-15v30z" fill="#f0b73a" stroke="#93651d" stroke-width="5"/>
+</svg>

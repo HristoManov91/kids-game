@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 150" role="img" aria-label="Volleyball net">
+  <path d="M25 22v110M195 22v110" stroke="#7b4e2a" stroke-width="8" stroke-linecap="round"/>
+  <path d="M28 36h164v66H28Z" fill="#ffffff" stroke="#24304a" stroke-width="4"/>
+  <path d="M28 55h164M28 74h164M28 93h164M55 36v66M82 36v66M110 36v66M138 36v66M165 36v66" stroke="#9fb0c8" stroke-width="3"/>
+  <ellipse cx="110" cy="136" rx="92" ry="7" fill="#6aa56a" opacity=".3"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Star">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#fff27a"/><stop offset="1" stop-color="#ffb72b"/></linearGradient></defs>
+  <path d="M60 11l13 31 34 3-26 22 8 33-29-18-29 18 8-33-26-22 34-3z" fill="url(#g)" stroke="#d88912" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="47" cy="43" r="5" fill="#fff7b7" opacity=".85"/>
+</svg>

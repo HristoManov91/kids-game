@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 150" role="img" aria-label="Football goal">
+  <path d="M30 118V35h160v83" fill="#ffffff" opacity=".65"/>
+  <path d="M30 118V35h160v83" fill="none" stroke="#24304a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30 56h160M30 77h160M30 98h160M57 35v83M84 35v83M112 35v83M140 35v83M167 35v83" stroke="#9fb0c8" stroke-width="3"/>
+  <ellipse cx="110" cy="132" rx="88" ry="7" fill="#6aa56a" opacity=".32"/>
+</svg>

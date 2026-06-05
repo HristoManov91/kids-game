@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Space station">
+  <rect x="58" y="46" width="44" height="28" rx="8" fill="#dfe8f8" stroke="#24304a" stroke-width="4"/>
+  <circle cx="80" cy="60" r="10" fill="#80d8ff" stroke="#24304a" stroke-width="4"/>
+  <path d="M26 60h108M80 25v70" stroke="#24304a" stroke-width="5" stroke-linecap="round"/>
+  <rect x="8" y="44" width="28" height="32" rx="4" fill="#3f7dd9" stroke="#24304a" stroke-width="4"/>
+  <rect x="124" y="44" width="28" height="32" rx="4" fill="#3f7dd9" stroke="#24304a" stroke-width="4"/>
+  <rect x="64" y="8" width="32" height="24" rx="4" fill="#ffcf55" stroke="#24304a" stroke-width="4"/>
+  <rect x="64" y="88" width="32" height="24" rx="4" fill="#ffcf55" stroke="#24304a" stroke-width="4"/>
+</svg>

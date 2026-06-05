@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="nebulaA" cx="22%" cy="24%" r="52%">
+      <stop offset="0" stop-color="#7f5cff" stop-opacity=".78"/>
+      <stop offset=".42" stop-color="#2943a6" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#071026" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebulaB" cx="78%" cy="70%" r="44%">
+      <stop offset="0" stop-color="#1dd7c2" stop-opacity=".54"/>
+      <stop offset=".5" stop-color="#234f9e" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#070b1c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="spaceBase" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#07091a"/>
+      <stop offset=".55" stop-color="#101845"/>
+      <stop offset="1" stop-color="#050712"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#spaceBase)"/>
+  <rect width="1600" height="900" fill="url(#nebulaA)"/>
+  <rect width="1600" height="900" fill="url(#nebulaB)"/>
+  <g fill="#fff">
+    <circle cx="95" cy="86" r="2.6"/><circle cx="188" cy="204" r="1.8"/><circle cx="318" cy="76" r="2.2"/>
+    <circle cx="455" cy="168" r="1.5"/><circle cx="604" cy="92" r="2.6"/><circle cx="782" cy="220" r="1.7"/>
+    <circle cx="970" cy="112" r="2.8"/><circle cx="1134" cy="230" r="1.9"/><circle cx="1328" cy="94" r="2.4"/>
+    <circle cx="1490" cy="174" r="1.8"/><circle cx="121" cy="520" r="2"/><circle cx="278" cy="700" r="1.7"/>
+    <circle cx="502" cy="640" r="2.5"/><circle cx="724" cy="780" r="1.8"/><circle cx="918" cy="640" r="2.1"/>
+    <circle cx="1120" cy="720" r="2.8"/><circle cx="1308" cy="598" r="1.6"/><circle cx="1512" cy="812" r="2.2"/>
+  </g>
+  <g stroke="#fff" stroke-linecap="round" opacity=".6">
+    <path d="M245 333l18 18M263 333l-18 18" stroke-width="3"/>
+    <path d="M1390 370l16 16M1406 370l-16 16" stroke-width="2.5"/>
+    <path d="M682 455l14 14M696 455l-14 14" stroke-width="2"/>
+  </g>
+</svg>

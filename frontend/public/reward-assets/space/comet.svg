@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 120" role="img" aria-label="Comet">
+  <defs>
+    <linearGradient id="tail" x1="0" x2="1"><stop stop-color="#7fe7ff" stop-opacity="0"/><stop offset="1" stop-color="#fff4a3"/></linearGradient>
+    <radialGradient id="head" cx="35%" cy="30%" r="70%"><stop stop-color="#fffce0"/><stop offset=".65" stop-color="#ffbd42"/><stop offset="1" stop-color="#d76a1f"/></radialGradient>
+  </defs>
+  <path d="M12 83c38-37 71-50 105-48-28 10-55 27-82 57" fill="none" stroke="url(#tail)" stroke-width="16" stroke-linecap="round"/>
+  <path d="M28 96c30-24 57-34 87-35-24 7-45 19-65 42" fill="none" stroke="#8ee7ff" stroke-width="8" stroke-linecap="round" opacity=".72"/>
+  <circle cx="114" cy="37" r="23" fill="url(#head)" stroke="#b35219" stroke-width="4"/>
+</svg>

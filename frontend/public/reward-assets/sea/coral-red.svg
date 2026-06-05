@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" role="img" aria-label="Red coral">
+  <g stroke="#e6505f" stroke-width="15" stroke-linecap="round" fill="none">
+    <path d="M75 132V38M75 76L42 48M75 91l34-32M75 61l26-34M75 105L45 89M75 116l43-12"/>
+  </g>
+  <g stroke="#a92c37" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M75 132V38M75 76L42 48M75 91l34-32M75 61l26-34M75 105L45 89M75 116l43-12"/>
+  </g>
+  <ellipse cx="75" cy="138" rx="46" ry="9" fill="#d5b275"/>
+</svg>

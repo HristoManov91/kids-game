@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 120" role="img" aria-label="Saturn">
+  <defs><radialGradient id="g" cx="38%" cy="28%" r="70%"><stop stop-color="#fff0bd"/><stop offset=".6" stop-color="#d0a54d"/><stop offset="1" stop-color="#806226"/></radialGradient></defs>
+  <ellipse cx="70" cy="66" rx="60" ry="16" fill="none" stroke="#d8c07a" stroke-width="10" transform="rotate(-13 70 66)"/>
+  <circle cx="70" cy="60" r="35" fill="url(#g)" stroke="#75581e" stroke-width="4"/>
+  <path d="M34 70c23 7 49 6 76-8" fill="none" stroke="#fff1b5" stroke-width="8" opacity=".7"/>
+</svg>

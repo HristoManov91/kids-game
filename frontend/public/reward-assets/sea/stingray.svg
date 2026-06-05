@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 125" role="img" aria-label="Stingray">
+  <path d="M22 65c37-53 109-54 146 0-35 34-111 34-146 0z" fill="#7566b9" stroke="#44388c" stroke-width="5"/>
+  <path d="M95 83c19 12 28 24 35 37" stroke="#44388c" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <circle cx="78" cy="57" r="5" fill="#17213a"/><circle cx="112" cy="57" r="5" fill="#17213a"/>
+  <path d="M75 73c13 7 27 7 40 0" stroke="#efe8ff" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>

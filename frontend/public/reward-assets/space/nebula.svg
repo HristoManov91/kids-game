@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 120" role="img" aria-label="Nebula">
+  <defs>
+    <radialGradient id="a" cx="40%" cy="45%" r="52%"><stop stop-color="#ffe6ff"/><stop offset=".4" stop-color="#c25cff"/><stop offset="1" stop-color="#2848c7" stop-opacity=".2"/></radialGradient>
+    <radialGradient id="b" cx="70%" cy="58%" r="42%"><stop stop-color="#81fff1"/><stop offset=".55" stop-color="#3d8fff" stop-opacity=".7"/><stop offset="1" stop-color="#121742" stop-opacity="0"/></radialGradient>
+  </defs>
+  <path d="M24 70c4-35 31-49 57-38 19 8 36 4 48 22 13 21-5 43-34 38-17-3-27 11-47 4-15-5-26-13-24-26z" fill="url(#a)"/>
+  <path d="M56 77c15-21 40-28 70-13-14 19-40 28-70 13z" fill="url(#b)"/>
+  <g fill="#fff"><circle cx="48" cy="49" r="2"/><circle cx="84" cy="37" r="1.6"/><circle cx="102" cy="74" r="2.2"/></g>
+</svg>

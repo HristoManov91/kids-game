@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 120" role="img" aria-label="UFO">
+  <path d="M46 49c5-21 43-21 48 0" fill="#bfe9ff" stroke="#24304a" stroke-width="4"/>
+  <ellipse cx="70" cy="64" rx="54" ry="18" fill="#b9c3d6" stroke="#24304a" stroke-width="4"/>
+  <ellipse cx="70" cy="60" rx="34" ry="10" fill="#f1f5ff"/>
+  <g fill="#ffd84c" stroke="#b88a18" stroke-width="2">
+    <circle cx="42" cy="66" r="5"/><circle cx="70" cy="70" r="5"/><circle cx="98" cy="66" r="5"/>
+  </g>
+  <path d="M48 82l-14 22M70 84v24M92 82l14 22" stroke="#9ddfff" stroke-width="7" stroke-linecap="round" opacity=".65"/>
+</svg>

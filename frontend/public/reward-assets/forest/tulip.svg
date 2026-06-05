@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" role="img" aria-label="Tulip">
+  <path d="M60 70v60" fill="none" stroke="#2f9b50" stroke-width="8" stroke-linecap="round"/>
+  <path d="M58 96c-21-9-31 5-36 19 20 6 32-3 36-19Z" fill="#55b967"/>
+  <path d="M64 102c21-9 31 5 36 19-20 6-32-3-36-19Z" fill="#45a95d"/>
+  <path d="M35 35c19 2 23 19 25 34 2-15 7-32 25-34 8 29-2 56-25 59-23-3-33-30-25-59Z" fill="#f25b7d"/>
+  <path d="M45 34c9 8 14 20 15 35 2-15 7-27 15-35 3 28-3 48-15 58-12-10-18-30-15-58Z" fill="#ff7a98"/>
+  <ellipse cx="60" cy="134" rx="42" ry="7" fill="#7fcf75" opacity=".45"/>
+</svg>

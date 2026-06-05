@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 120" role="img" aria-label="Blue crab">
+  <ellipse cx="85" cy="70" rx="43" ry="28" fill="#48b8e8" stroke="#236da6" stroke-width="5"/>
+  <g stroke="#236da6" stroke-width="6" stroke-linecap="round" fill="none">
+    <path d="M45 68L18 52M125 68l27-16M52 89l-18 18M70 94l-5 17M100 94l5 17M118 89l18 18"/>
+  </g>
+  <path d="M37 45c-22-11-26-31-6-31 17 0 16 17 6 31zM133 45c22-11 26-31 6-31-17 0-16 17-6 31z" fill="#68d4ff" stroke="#236da6" stroke-width="5"/>
+  <circle cx="70" cy="57" r="6" fill="#17213a"/><circle cx="100" cy="57" r="6" fill="#17213a"/>
+</svg>

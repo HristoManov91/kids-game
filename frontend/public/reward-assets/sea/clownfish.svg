@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 120" role="img" aria-label="Clownfish">
+  <path d="M20 60l34-24v48z" fill="#e8591b" stroke="#a83912" stroke-width="4"/>
+  <ellipse cx="91" cy="60" rx="56" ry="35" fill="#ff8a24" stroke="#a83912" stroke-width="4"/>
+  <g fill="#fff" stroke="#17213a" stroke-width="3">
+    <path d="M61 29c-9 18-9 44 0 62l15-4c-7-17-7-37 0-54z"/>
+    <path d="M106 27c-8 19-8 47 0 66l14-5c-6-18-6-39 0-56z"/>
+  </g>
+  <circle cx="129" cy="50" r="6" fill="#17213a"/>
+</svg>

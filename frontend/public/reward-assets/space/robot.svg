@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Робот">
+  <defs>
+    <linearGradient id="robotBody" x1="58" x2="182" y1="50" y2="202">
+      <stop offset="0" stop-color="#e9f3ff"/>
+      <stop offset=".55" stop-color="#9fb7d8"/>
+      <stop offset="1" stop-color="#617797"/>
+    </linearGradient>
+  </defs>
+  <path d="M120 42v23" stroke="#526681" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="120" cy="36" r="12" fill="#ffcc4d"/>
+  <rect x="55" y="65" width="130" height="104" rx="28" fill="url(#robotBody)" stroke="#526681" stroke-width="8"/>
+  <circle cx="91" cy="111" r="15" fill="#27344e"/>
+  <circle cx="149" cy="111" r="15" fill="#27344e"/>
+  <path d="M92 142h56" stroke="#27344e" stroke-width="10" stroke-linecap="round"/>
+  <path d="M55 116H31M185 116h24" stroke="#526681" stroke-width="12" stroke-linecap="round"/>
+  <rect x="77" y="172" width="28" height="32" rx="10" fill="#7b91b0" stroke="#526681" stroke-width="7"/>
+  <rect x="135" y="172" width="28" height="32" rx="10" fill="#7b91b0" stroke="#526681" stroke-width="7"/>
+  <circle cx="95" cy="87" r="6" fill="#ffffff" opacity=".75"/>
+  <circle cx="153" cy="87" r="6" fill="#ffffff" opacity=".75"/>
+</svg>

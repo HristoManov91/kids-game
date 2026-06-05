@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Jupiter">
+  <defs><radialGradient id="g" cx="36%" cy="28%" r="70%"><stop stop-color="#fff0cc"/><stop offset=".6" stop-color="#d5965a"/><stop offset="1" stop-color="#7a4b32"/></radialGradient></defs>
+  <circle cx="60" cy="60" r="46" fill="url(#g)" stroke="#6d412b" stroke-width="4"/>
+  <path d="M18 43h84M16 58h88M21 75h78" stroke="#f7d7a2" stroke-width="8" opacity=".75"/>
+  <ellipse cx="76" cy="68" rx="15" ry="8" fill="#b54d32" stroke="#813321" stroke-width="3"/>
+</svg>

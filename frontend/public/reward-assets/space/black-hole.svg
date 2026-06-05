@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 120" role="img" aria-label="Black hole">
+  <defs>
+    <radialGradient id="hole" cx="50%" cy="50%" r="55%"><stop offset=".25" stop-color="#02030a"/><stop offset=".62" stop-color="#16163a"/><stop offset="1" stop-color="#ff8b32"/></radialGradient>
+  </defs>
+  <ellipse cx="70" cy="60" rx="58" ry="22" fill="#ffb237" transform="rotate(-12 70 60)" opacity=".86"/>
+  <ellipse cx="70" cy="60" rx="44" ry="16" fill="#7d45ff" transform="rotate(-12 70 60)" opacity=".72"/>
+  <circle cx="70" cy="60" r="31" fill="url(#hole)" stroke="#0a0b17" stroke-width="4"/>
+  <circle cx="70" cy="60" r="18" fill="#000"/>
+</svg>
