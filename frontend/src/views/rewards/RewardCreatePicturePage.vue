@@ -13,6 +13,10 @@ const saving = ref(false)
 
 const selectedTheme = computed(() => rewards.themes.find((theme) => theme.id === selectedThemeId.value) ?? rewards.themes[0])
 
+function isAssetThumbnail(thumbnail: string) {
+  return thumbnail.startsWith('/')
+}
+
 onMounted(async () => {
   await rewards.bootstrap()
   if (!selectedThemeId.value && rewards.themes.length > 0) {
@@ -60,7 +64,10 @@ async function createPicture() {
           :class="{ active: selectedThemeId === theme.id }"
           @click="selectedThemeId = theme.id"
         >
-          <span class="theme-art" :style="{ background: theme.backgroundImage }">{{ theme.thumbnailImage }}</span>
+          <span class="theme-art" :style="{ background: theme.backgroundImage }">
+            <img v-if="isAssetThumbnail(theme.thumbnailImage)" :src="theme.thumbnailImage" :alt="theme.name" />
+            <span v-else>{{ theme.thumbnailImage }}</span>
+          </span>
           <strong>{{ theme.name }}</strong>
           <small>{{ theme.description }}</small>
         </button>
@@ -146,7 +153,14 @@ async function createPicture() {
   aspect-ratio: 16 / 9;
   place-items: center;
   border-radius: 10px;
+  overflow: hidden;
   font-size: 3.2rem;
+}
+
+.theme-art img {
+  width: min(74%, 150px);
+  height: min(80%, 116px);
+  object-fit: contain;
 }
 
 .theme-card strong {

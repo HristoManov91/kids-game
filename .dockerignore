@@ -1,0 +1,8 @@
+.git
+.idea
+.DS_Store
+docs
+backend/target
+frontend/node_modules
+frontend/dist
+*.log

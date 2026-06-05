@@ -52,7 +52,7 @@ public class DataSeeder implements ApplicationRunner {
             PasswordEncoder passwordEncoder,
             QuizGenerator quizGenerator,
             ObjectMapper objectMapper,
-            @Value("${app.demo.seed-enabled:true}") boolean seedEnabled
+            @Value("${app.demo.seed-enabled:false}") boolean seedEnabled
     ) {
         this.userRepository = userRepository;
         this.attemptRepository = attemptRepository;

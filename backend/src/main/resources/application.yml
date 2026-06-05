@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
   address: 0.0.0.0
 
 spring:
@@ -21,7 +21,7 @@ spring:
 
 app:
   demo:
-    seed-enabled: ${APP_DEMO_SEED_ENABLED:true}
+    seed-enabled: ${APP_DEMO_SEED_ENABLED:false}
   admin:
     usernames: ${APP_ADMIN_USERNAMES:христо}
   security:
