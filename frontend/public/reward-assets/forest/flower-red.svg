@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" role="img" aria-label="Red flower">
+  <path d="M61 61v68" fill="none" stroke="#2f9b50" stroke-width="8" stroke-linecap="round"/>
+  <path d="M59 96c-20-8-30 5-35 19 19 5 31-3 35-19Z" fill="#55b967"/>
+  <path d="M64 102c20-8 30 5 35 19-19 5-31-3-35-19Z" fill="#45a95d"/>
+  <circle cx="60" cy="52" r="20" fill="#ef4d52"/>
+  <circle cx="43" cy="65" r="18" fill="#ff6b6b"/>
+  <circle cx="77" cy="65" r="18" fill="#e44249"/>
+  <circle cx="60" cy="79" r="16" fill="#ff797d"/>
+  <circle cx="60" cy="64" r="13" fill="#ffd25f"/>
+  <ellipse cx="60" cy="134" rx="42" ry="7" fill="#7fcf75" opacity=".45"/>
+</svg>

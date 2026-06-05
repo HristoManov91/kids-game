@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Rocket">
+  <defs><linearGradient id="body" x1="0" x2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#c9d8f5"/></linearGradient></defs>
+  <path d="M67 10c24 19 25 48 13 77L42 49C47 28 55 16 67 10z" fill="url(#body)" stroke="#24304a" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M42 49L24 65l21 8M80 87l-16 18-8-22" fill="#e24d4d" stroke="#24304a" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="65" cy="43" r="10" fill="#78d8ff" stroke="#24304a" stroke-width="4"/>
+  <path d="M45 80c-6 9-8 17-9 27 10-2 18-6 26-14z" fill="#ffb72b" stroke="#e36d1c" stroke-width="3"/>
+</svg>

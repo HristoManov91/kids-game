@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Sea background">
+  <defs>
+    <linearGradient id="water" x1="0" x2="0" y1="0" y2="1">
+      <stop stop-color="#8be8ff"/>
+      <stop offset=".42" stop-color="#33a7df"/>
+      <stop offset="1" stop-color="#07507f"/>
+    </linearGradient>
+    <radialGradient id="light" cx=".35" cy=".05" r=".65">
+      <stop stop-color="#ffffff" stop-opacity=".75"/>
+      <stop offset=".45" stop-color="#ffffff" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#water)"/>
+  <rect width="1600" height="900" fill="url(#light)"/>
+  <path d="M0 755c170-52 292 34 457 2 179-35 302-91 495-28 162 53 286 64 431 5 95-39 166-37 217-14v180H0z" fill="#eecb88"/>
+  <path d="M0 812c190-22 320 33 492 8 220-31 344-55 565-8 186 40 331 23 543-15v103H0z" fill="#d9a966" opacity=".75"/>
+  <g opacity=".38" stroke="#d7fbff" stroke-width="8" fill="none">
+    <path d="M120 88c240 62 394-55 620 8 210 59 401 22 672-20"/>
+    <path d="M70 178c244 52 407-39 620 16 206 53 430 14 784-10"/>
+  </g>
+  <g fill="#ffffff" opacity=".42">
+    <circle cx="152" cy="330" r="10"/><circle cx="220" cy="282" r="6"/><circle cx="1305" cy="220" r="8"/>
+    <circle cx="1420" cy="348" r="13"/><circle cx="1160" cy="144" r="5"/><circle cx="740" cy="248" r="7"/>
+  </g>
+</svg>

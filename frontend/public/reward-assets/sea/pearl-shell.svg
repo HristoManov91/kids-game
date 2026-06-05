@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 120" role="img" aria-label="Pearl shell">
+  <path d="M28 87c7-33 24-52 47-52s40 19 47 52H28z" fill="#ffd9e8" stroke="#b46f91" stroke-width="5"/>
+  <path d="M25 87c28 15 72 15 100 0" fill="#fff5fb" stroke="#b46f91" stroke-width="5"/>
+  <circle cx="75" cy="76" r="15" fill="#f8fdff" stroke="#a8c9d8" stroke-width="4"/>
+</svg>

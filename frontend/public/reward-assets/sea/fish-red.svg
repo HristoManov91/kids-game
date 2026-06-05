@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 110" role="img" aria-label="Red fish">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#ff9c82"/><stop offset="1" stop-color="#e23349"/></linearGradient></defs>
+  <path d="M18 55l34-27v54z" fill="#c7263b"/>
+  <ellipse cx="86" cy="55" rx="53" ry="35" fill="url(#g)" stroke="#9c1d31" stroke-width="4"/>
+  <path d="M72 23c10 17 12 48 2 65" stroke="#ffd0c6" stroke-width="6" opacity=".65"/>
+  <circle cx="121" cy="46" r="6" fill="#17213a"/>
+</svg>

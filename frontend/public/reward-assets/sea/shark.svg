@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" role="img" aria-label="Shark">
+  <path d="M42 60L10 34v52z" fill="#617289"/>
+  <path d="M83 29L105 4l11 35z" fill="#7c8ca0"/>
+  <path d="M31 63c34-44 110-43 151-7-31 35-113 42-151 7z" fill="#8fa3b8" stroke="#4a5c70" stroke-width="5"/>
+  <path d="M72 77c37 18 83 16 110-21-16 36-72 55-110 21z" fill="#ffffff" opacity=".8"/>
+  <circle cx="151" cy="47" r="6" fill="#17213a"/>
+  <path d="M161 65l15-4-11 12z" fill="#ffffff" stroke="#4a5c70" stroke-width="2"/>
+</svg>

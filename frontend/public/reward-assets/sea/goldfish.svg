@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Goldfish">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#ffd84d"/><stop offset="1" stop-color="#ff8a1f"/></linearGradient></defs>
+  <path d="M30 60C18 38 24 22 49 34c-5 11-5 40 0 52-25 12-31-5-19-26z" fill="#ff8f22"/>
+  <ellipse cx="90" cy="60" rx="49" ry="34" fill="url(#g)" stroke="#c46e15" stroke-width="4"/>
+  <path d="M70 30c-16-19 31-19 17 0M72 90c-15 18 32 18 18 0" fill="#ffad2c" stroke="#c46e15" stroke-width="4"/>
+  <circle cx="122" cy="50" r="6" fill="#17213a"/>
+</svg>

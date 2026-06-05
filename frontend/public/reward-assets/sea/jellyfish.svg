@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 170" role="img" aria-label="Jellyfish">
+  <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#f5c7ff"/><stop offset="1" stop-color="#7bd8ff"/></linearGradient></defs>
+  <path d="M28 74c0-33 21-58 48-58s48 25 48 58H28z" fill="url(#g)" stroke="#6f78c9" stroke-width="5"/>
+  <path d="M28 74c16 14 32 14 48 0 16 14 32 14 48 0" fill="none" stroke="#6f78c9" stroke-width="5"/>
+  <g stroke="#75bce6" stroke-width="7" stroke-linecap="round" fill="none">
+    <path d="M48 82c-15 25 15 39 0 65M70 82c-12 27 15 38 0 65M92 82c-12 27 15 38 0 65M114 82c-15 25 15 39 0 65"/>
+  </g>
+</svg>

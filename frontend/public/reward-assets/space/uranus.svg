@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Uranus">
+  <defs><radialGradient id="g" cx="36%" cy="28%" r="70%"><stop stop-color="#d9ffff"/><stop offset=".58" stop-color="#66d6df"/><stop offset="1" stop-color="#288694"/></radialGradient></defs>
+  <circle cx="60" cy="60" r="43" fill="url(#g)" stroke="#1f707d" stroke-width="4"/>
+  <path d="M25 54c22 8 48 8 70 0M27 68c20 6 46 6 66 0" fill="none" stroke="#e7ffff" stroke-width="5" opacity=".55" stroke-linecap="round"/>
+</svg>

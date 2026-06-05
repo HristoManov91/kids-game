@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" role="img" aria-label="Dolphin">
+  <path d="M55 63C82 15 145 18 181 50c-38 43-95 53-141 28-16-8-17-26 15-15z" fill="#5bbce6" stroke="#267aa5" stroke-width="5"/>
+  <path d="M87 35L107 8l8 37M62 76L43 105l45-15" fill="#5bbce6" stroke="#267aa5" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M126 64c23-1 38-7 55-14-22 26-53 34-83 26" fill="#d8f6ff" opacity=".85"/>
+  <circle cx="154" cy="45" r="5" fill="#17213a"/>
+</svg>

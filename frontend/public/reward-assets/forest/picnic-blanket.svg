@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 150" role="img" aria-label="Picnic blanket">
+  <path d="M30 45h160l14 76H16Z" fill="#f35f68" stroke="#9b2c35" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M55 46v78M91 46v78M129 46v78M165 46v78M18 73h185M23 99h176" stroke="#fff4de" stroke-width="7" opacity=".9"/>
+  <path d="M41 43h139" stroke="#ffd9a8" stroke-width="8" stroke-linecap="round"/>
+  <ellipse cx="110" cy="128" rx="90" ry="12" fill="#7ebf67" opacity=".28"/>
+</svg>

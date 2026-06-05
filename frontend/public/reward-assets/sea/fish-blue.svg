@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 110" role="img" aria-label="Blue fish">
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#48d8ff"/><stop offset="1" stop-color="#2468d9"/></linearGradient></defs>
+  <path d="M18 55l34-27v54z" fill="#1f58bb"/>
+  <ellipse cx="86" cy="55" rx="53" ry="35" fill="url(#g)" stroke="#174a9c" stroke-width="4"/>
+  <path d="M88 22c-8 17-8 49 0 66" stroke="#d5f7ff" stroke-width="6" opacity=".65"/>
+  <circle cx="121" cy="46" r="6" fill="#17213a"/>
+  <path d="M123 65c-8 8-18 8-28 0" stroke="#17213a" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>

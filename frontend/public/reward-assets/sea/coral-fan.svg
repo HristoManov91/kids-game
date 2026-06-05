@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" role="img" aria-label="Fan coral">
+  <path d="M31 129C38 63 75 25 123 31c-1 51-31 85-92 98z" fill="#ff9a7a" stroke="#b94d38" stroke-width="5"/>
+  <g stroke="#fff0e8" stroke-width="3" opacity=".75" fill="none">
+    <path d="M41 121c14-38 37-65 72-82M57 122c8-30 30-60 57-74M74 118c7-24 20-47 38-61"/>
+    <path d="M42 96c24 0 45-9 68-28M52 75c23 2 43-5 59-21"/>
+  </g>
+</svg>

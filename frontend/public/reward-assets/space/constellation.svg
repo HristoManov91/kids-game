@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 120" role="img" aria-label="Constellation">
+  <rect x="8" y="10" width="124" height="100" rx="18" fill="#101845"/>
+  <path d="M28 76l28-34 31 18 25-31" fill="none" stroke="#9ed7ff" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#fff4a3" stroke="#ffbf28" stroke-width="3">
+    <circle cx="28" cy="76" r="7"/><circle cx="56" cy="42" r="7"/><circle cx="87" cy="60" r="7"/><circle cx="112" cy="29" r="7"/>
+  </g>
+</svg>

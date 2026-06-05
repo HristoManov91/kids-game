@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Mars">
+  <defs><radialGradient id="g" cx="35%" cy="28%" r="70%"><stop stop-color="#ffc299"/><stop offset=".55" stop-color="#d65b31"/><stop offset="1" stop-color="#842518"/></radialGradient></defs>
+  <circle cx="60" cy="60" r="43" fill="url(#g)" stroke="#7c2416" stroke-width="4"/>
+  <path d="M28 58c18-8 31-4 48-12M38 78c17-4 36-4 52 2" fill="none" stroke="#7c2416" stroke-width="7" opacity=".45" stroke-linecap="round"/>
+  <circle cx="44" cy="45" r="5" fill="#7c2416" opacity=".35"/>
+</svg>

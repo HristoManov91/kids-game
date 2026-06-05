@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 150" role="img" aria-label="Deer">
+  <ellipse cx="92" cy="136" rx="70" ry="8" fill="#6aa56a" opacity=".3"/>
+  <ellipse cx="92" cy="82" rx="48" ry="30" fill="#b87945"/>
+  <circle cx="139" cy="58" r="24" fill="#c88b55"/>
+  <path d="M154 40c14-24 26-23 18 2M147 38c-2-29 12-34 14-7M132 40c-12-24-25-23-18 2M139 38c2-29-12-34-14-7" fill="none" stroke="#6b3a20" stroke-width="6" stroke-linecap="round"/>
+  <path d="M54 96v36M82 102v33M118 101v34M141 82v48" stroke="#6b3a20" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="148" cy="57" r="3" fill="#24304a"/>
+  <path d="M161 68c-7 4-14 4-20 0" fill="none" stroke="#7a4424" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="78" cy="75" r="5" fill="#f4d1a2"/><circle cx="104" cy="83" r="5" fill="#f4d1a2"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" role="img" aria-label="Purple flower">
+  <path d="M60 58v71" fill="none" stroke="#2f9b50" stroke-width="8" stroke-linecap="round"/>
+  <path d="M58 97c-19-7-29 5-34 18 18 6 30-2 34-18Z" fill="#55b967"/>
+  <path d="M64 103c19-7 29 5 34 18-18 6-30-2-34-18Z" fill="#45a95d"/>
+  <ellipse cx="60" cy="42" rx="16" ry="29" fill="#9d76ff"/>
+  <ellipse cx="60" cy="79" rx="16" ry="29" fill="#b08cff"/>
+  <ellipse cx="36" cy="61" rx="27" ry="16" fill="#8e65f1"/>
+  <ellipse cx="84" cy="61" rx="27" ry="16" fill="#8e65f1"/>
+  <circle cx="60" cy="62" r="14" fill="#ffd45c"/>
+  <ellipse cx="60" cy="134" rx="42" ry="7" fill="#7fcf75" opacity=".45"/>
+</svg>

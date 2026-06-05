@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 180" role="img" aria-label="Girl">
+  <ellipse cx="60" cy="166" rx="35" ry="8" fill="#6aa56a" opacity=".32"/>
+  <path d="M34 42c2-30 50-30 52 0 2 31-8 45-26 45S32 73 34 42Z" fill="#b77822"/>
+  <circle cx="60" cy="45" r="25" fill="#ffd7a1" stroke="#bf8a58" stroke-width="3"/>
+  <path d="M35 43c8-23 35-28 50-5-18-2-32-2-50 5Z" fill="#7b481b"/>
+  <path d="M39 80h42l14 56H25Z" fill="#f06f98"/>
+  <path d="M36 88 17 116M84 88l19 28" stroke="#ffd7a1" stroke-width="10" stroke-linecap="round"/>
+  <path d="M49 136v23M71 136v23" stroke="#24304a" stroke-width="10" stroke-linecap="round"/>
+  <path d="M42 162h16M63 162h16" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="51" cy="47" r="3" fill="#24304a"/><circle cx="69" cy="47" r="3" fill="#24304a"/>
+  <path d="M51 59c7 5 12 5 18 0" fill="none" stroke="#24304a" stroke-width="3" stroke-linecap="round"/>
+</svg>

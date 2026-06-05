@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-label="Milky way">
+  <defs>
+    <radialGradient id="core" cx="50%" cy="50%" r="45%"><stop stop-color="#fffad1"/><stop offset=".45" stop-color="#90d8ff"/><stop offset="1" stop-color="#6d57ff" stop-opacity=".2"/></radialGradient>
+  </defs>
+  <rect width="160" height="120" rx="18" fill="#0b1233"/>
+  <ellipse cx="80" cy="60" rx="62" ry="18" fill="url(#core)" transform="rotate(-18 80 60)"/>
+  <ellipse cx="80" cy="60" rx="35" ry="9" fill="#fff8bf" opacity=".75" transform="rotate(-18 80 60)"/>
+  <g fill="#fff">
+    <circle cx="24" cy="22" r="2"/><circle cx="42" cy="88" r="1.5"/><circle cx="119" cy="27" r="2.2"/><circle cx="139" cy="86" r="1.7"/>
+    <circle cx="66" cy="20" r="1.4"/><circle cx="102" cy="96" r="1.8"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 170" role="img" aria-label="Forest cabin">
+  <ellipse cx="112" cy="145" rx="88" ry="13" fill="#5d8f52" opacity=".35"/>
+  <path d="M35 73h145v70H35Z" fill="#9a5b33" stroke="#5b341e" stroke-width="5"/>
+  <path d="M23 77 109 22l88 55Z" fill="#5d3320" stroke="#3c2217" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M54 86h42v57H54Z" fill="#6b3a25" stroke="#3d2115" stroke-width="4"/>
+  <circle cx="86" cy="116" r="4" fill="#f5ca68"/>
+  <path d="M119 88h37v30h-37Z" fill="#b9e8ff" stroke="#50301f" stroke-width="4"/>
+  <path d="M138 88v30M119 103h37" stroke="#50301f" stroke-width="3"/>
+  <path d="M44 74h132" stroke="#d19a5d" stroke-width="6"/>
+  <path d="M38 96h140M38 119h140" stroke="#764522" stroke-width="5" opacity=".8"/>
+</svg>

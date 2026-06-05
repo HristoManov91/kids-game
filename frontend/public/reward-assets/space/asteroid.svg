@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Asteroid">
+  <path d="M34 22l35-7 30 22 3 33-22 28-37 4-26-25 4-36z" fill="#8b7462" stroke="#4d3f35" stroke-width="5" stroke-linejoin="round"/>
+  <circle cx="47" cy="48" r="9" fill="#5e4e43" opacity=".45"/>
+  <circle cx="75" cy="38" r="6" fill="#5e4e43" opacity=".4"/>
+  <circle cx="72" cy="75" r="11" fill="#5e4e43" opacity=".36"/>
+</svg>

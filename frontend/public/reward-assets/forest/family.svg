@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 170" role="img" aria-label="Family">
+  <ellipse cx="110" cy="154" rx="78" ry="10" fill="#6aa56a" opacity=".3"/>
+  <g transform="translate(24 18)">
+    <circle cx="32" cy="36" r="23" fill="#ffd7a1" stroke="#bf8a58" stroke-width="3"/>
+    <path d="M11 36c5-26 40-25 43 1-15-7-27-5-43-1Z" fill="#4d2c22"/>
+    <path d="M11 70h42l8 58H3Z" fill="#2b8e65"/>
+  </g>
+  <g transform="translate(83 8)">
+    <circle cx="32" cy="36" r="23" fill="#ffd7a1" stroke="#bf8a58" stroke-width="3"/>
+    <path d="M8 34c8-27 42-27 48 4-18-4-31-3-48-4Z" fill="#b77822"/>
+    <path d="M11 70h42l12 58H-1Z" fill="#f06f98"/>
+  </g>
+  <g transform="translate(144 45) scale(.78)">
+    <circle cx="32" cy="36" r="23" fill="#ffd7a1" stroke="#bf8a58" stroke-width="3"/>
+    <path d="M10 34c8-23 39-24 45 2-17-5-29-4-45-2Z" fill="#5a3326"/>
+    <path d="M10 70h44l8 58H2Z" fill="#3f7dd9"/>
+  </g>
+</svg>
