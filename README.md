@@ -124,18 +124,25 @@ npm run build
 
 ## Deploy
 
-Repo-то има `Dockerfile` и `render.yaml`, подготвени за Render Blueprint deploy. В този вариант Spring Boot сервира готовия Vue build и API-то от един домейн, а PostgreSQL е отделна managed база.
+Няма Render deploy конфигурация в repo-то, за да не те води към платена база по невнимание.
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/HristoManov91/kids-game)
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&builder=dockerfile&repository=github.com/HristoManov91/kids-game&branch=main&name=kids-game&ports=8080;http;/)
 
-`render.yaml` е настроен изрично на `free`, за да не избере Render платен план по подразбиране. Важно: Render free web service може да заспива при липса на трафик, а Render free PostgreSQL има времеви лимит. Това е ок за проба и споделяне с приятели, но не е мястото за важни production данни.
+Безплатният вариант, който има най-много смисъл за този проект:
 
-Ако искаш по-дълъг безплатен вариант за базата, използвай free PostgreSQL от Supabase или Neon и сложи техния connection string в `DB_URL`. Backend-ът приема и двата формата:
+- Koyeb free instance за приложението
+- Supabase или Neon free PostgreSQL за базата
 
-```bash
-jdbc:postgresql://...
-postgresql://...
-```
+В Koyeb трябва да добавиш тези environment променливи преди deploy:
+
+| Key | Value |
+| --- | --- |
+| `DB_URL` | connection string от Supabase/Neon |
+| `APP_JWT_SECRET` | дълга случайна стойност |
+| `APP_DEMO_SEED_ENABLED` | `false` |
+| `APP_TOKEN_TTL_HOURS` | `12` |
+
+Backend-ът приема и `jdbc:postgresql://...`, и нормален hosted Postgres URL от типа `postgresql://...`.
 
 Приложението пак логически има две части:
 
