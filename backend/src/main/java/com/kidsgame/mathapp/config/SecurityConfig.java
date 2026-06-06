@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 "/",
                                 "/index.html",
                                 "/assets/**",
+                                "/reward-assets/**",
                                 "/favicon.ico",
                                 "/vite.svg",
                                 "/login",
