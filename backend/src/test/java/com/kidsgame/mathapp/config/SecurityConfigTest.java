@@ -98,6 +98,12 @@ class SecurityConfigTest {
     }
 
     @Test
+    void servesStaticRewardImagesToAnonymousUsers() throws Exception {
+        mockMvc.perform(get("/reward-assets/polished/forest/wolf.png"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void allowsHuggingFaceToFrameSpaShell() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
@@ -212,6 +218,11 @@ class SecurityConfigTest {
         @GetMapping("/index.html")
         String index() {
             return "app";
+        }
+
+        @GetMapping("/reward-assets/polished/forest/wolf.png")
+        String rewardAsset() {
+            return "asset";
         }
     }
 }
