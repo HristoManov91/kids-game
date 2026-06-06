@@ -1,5 +1,6 @@
 package com.kidsgame.mathapp.auth;
 
+import com.kidsgame.mathapp.admin.AdminAccess;
 import com.kidsgame.mathapp.user.Role;
 import com.kidsgame.mathapp.user.UserEntity;
 import com.kidsgame.mathapp.user.UserRepository;
@@ -26,17 +27,20 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AdminAccess adminAccess;
 
     public AuthController(
             AuthenticationManager authenticationManager,
             JwtService jwtService,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            AdminAccess adminAccess
     ) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.adminAccess = adminAccess;
     }
 
     @PostMapping("/login")
@@ -62,6 +66,9 @@ public class AuthController {
         if (!request.password().equals(request.repeatPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Паролите не съвпадат.");
         }
+        if (adminAccess.isConfiguredAdminUsername(request.username())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Това потребителско име е запазено.");
+        }
         if (userRepository.existsByUsernameIgnoreCase(request.username())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Акаунтът вече съществува.");
         }
@@ -85,6 +92,9 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('PARENT')")
     public UserResponse createChild(@Valid @RequestBody CreateChildRequest request) {
+        if (adminAccess.isConfiguredAdminUsername(request.username())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Това потребителско име е запазено.");
+        }
         if (userRepository.existsByUsernameIgnoreCase(request.username())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Потребителското име вече съществува.");
         }

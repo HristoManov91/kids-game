@@ -1,6 +1,7 @@
 package com.kidsgame.mathapp.admin;
 
 import com.kidsgame.mathapp.auth.UserPrincipal;
+import com.kidsgame.mathapp.user.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -30,7 +31,11 @@ public class AdminAccess {
         if (!(authentication.getPrincipal() instanceof UserPrincipal principal)) {
             return false;
         }
-        return adminUsernames.contains(normalize(principal.getUsername()));
+        return principal.role() == Role.PARENT && isConfiguredAdminUsername(principal.getUsername());
+    }
+
+    public boolean isConfiguredAdminUsername(String username) {
+        return adminUsernames.contains(normalize(username));
     }
 
     private static String normalize(String username) {

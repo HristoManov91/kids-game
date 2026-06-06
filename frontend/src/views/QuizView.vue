@@ -536,6 +536,31 @@ async function submitAnswer() {
   }
 }
 
+async function saveCurrentAnswerIfReady() {
+  const question = currentQuestion.value
+  if (!question || currentAnswer.value) {
+    return true
+  }
+
+  const answer = typedAnswer.value
+  draftAnswers.value = { ...draftAnswers.value, [question.id]: answer }
+  if (!isDraftAnswerComplete(question, answer)) {
+    return true
+  }
+
+  checking.value = true
+  error.value = ''
+  try {
+    await quiz.answer(question.id, answer)
+    return true
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Отговорът не беше записан.'
+    return false
+  } finally {
+    checking.value = false
+  }
+}
+
 function choose(value: string) {
   if (!currentAnswer.value) {
     typedAnswer.value = value
@@ -1751,14 +1776,20 @@ function isGroupingComplete(question: QuestionResponse) {
   return groupingQuestionItems(question).every((item) => Boolean(assignments[item.word]))
 }
 
-function nextQuestion() {
+async function nextQuestion() {
+  if (checking.value || finishing.value) {
+    return
+  }
+  if (!(await saveCurrentAnswerIfReady())) {
+    return
+  }
   if (index.value < questions.value.length - 1) {
     index.value += 1
   }
 }
 
-function handleEnter() {
-  nextQuestion()
+async function handleEnter() {
+  await nextQuestion()
 }
 
 async function finishQuiz() {
@@ -1770,6 +1801,9 @@ async function finishQuiz() {
   try {
     if (activeStartedAt.value || shouldTrackActiveTime()) {
       await syncActiveTime(false)
+    }
+    if (currentQuestion.value && !currentAnswer.value) {
+      draftAnswers.value = { ...draftAnswers.value, [currentQuestion.value.id]: typedAnswer.value }
     }
     for (const question of questions.value) {
       const answer = draftAnswers.value[question.id]
@@ -2244,7 +2278,7 @@ async function submitIssueReport() {
           <button
             class="button secondary"
             type="button"
-            :disabled="index >= questions.length - 1"
+            :disabled="checking || finishing || index >= questions.length - 1"
             @click="nextQuestion"
           >
             <ArrowRight :size="20" />
