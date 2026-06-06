@@ -35,10 +35,10 @@ function fillDemo(nextUsername: string, nextPassword: string) {
     <div class="login-copy">
       <div class="login-badge">
         <Sparkles :size="18" />
-        <span>Математика с усмивка</span>
+        <span>Учене с награди</span>
       </div>
       <h1>Задачки за малки шампиони</h1>
-      <p>Избери профил и започни тест с 20 различни задачи.</p>
+      <p>Решавай математика, български и логически игри, печели кристали и подреждай собствени албуми с награди.</p>
     </div>
 
     <form class="login-panel panel" @submit.prevent="submit">

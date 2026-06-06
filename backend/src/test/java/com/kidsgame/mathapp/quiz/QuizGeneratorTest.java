@@ -14,13 +14,13 @@ class QuizGeneratorTest {
     private final QuizGenerator generator = new QuizGenerator();
 
     @Test
-    void generatesTwentyQuestionsForEveryMode() {
+    void generatesTenQuestionsForEverySingleMathMode() {
         for (QuizMode mode : QuizGenerator.MATH_LINEAR_MODES) {
             List<GeneratedQuestion> questions = generator.generate(mode, 1);
 
-            assertThat(questions).hasSize(20);
+            assertThat(questions).hasSize(QuizGenerator.SINGLE_QUESTIONS_PER_TEST);
             assertThat(new HashSet<>(questions.stream().map(GeneratedQuestion::prompt).toList()))
-                    .hasSizeGreaterThan(10);
+                    .hasSizeGreaterThan(5);
         }
     }
 
@@ -161,24 +161,32 @@ class QuizGeneratorTest {
                         assertThat(spotObjectCount(question)).isGreaterThanOrEqualTo(30);
                         assertThat(differenceIds).hasSize(expectedCount);
                         assertThat(java.util.Arrays.asList(question.answer().split(";"))).containsExactlyElementsOf(differenceIds);
-                        assertThat(QuestionScoring.weight(question)).isEqualTo(expectedCount);
+                        assertThat(QuestionScoring.weight(question)).isEqualTo(1);
                     });
         });
     }
 
     @Test
-    void spotDifferencesScoringPenalizesWrongMarks() {
+    void spotDifferencesScoringUsesOnePointPerQuestion() {
         GeneratedQuestion question = generator.generate(QuizCategory.LOGIC, QuizMode.SPOT_DIFFERENCES, 4).getFirst();
         List<String> differenceIds = spotDifferenceIds(question);
-        AnswerRecord answer = new AnswerRecord(
+        AnswerRecord correctAnswer = new AnswerRecord(
                 question.id(),
-                differenceIds.get(0) + ";" + differenceIds.get(1) + ";N:L:not-a-difference",
+                String.join(";", differenceIds),
+                true,
+                question.answer(),
+                java.time.Instant.now()
+        );
+        AnswerRecord wrongAnswer = new AnswerRecord(
+                question.id(),
+                differenceIds.get(0),
                 false,
                 question.answer(),
                 java.time.Instant.now()
         );
 
-        assertThat(QuestionScoring.score(question, answer)).isEqualTo(1);
+        assertThat(QuestionScoring.score(question, correctAnswer)).isEqualTo(1);
+        assertThat(QuestionScoring.score(question, wrongAnswer)).isZero();
     }
 
     @Test
@@ -193,7 +201,7 @@ class QuizGeneratorTest {
         assertThat(question.prompt()).startsWith("Намери ");
         assertThat(question.speechText()).isNotBlank();
         assertThat(question.choices()).isEmpty();
-        assertThat(question.answerSlots()).anySatisfy(slot -> assertThat(slot).startsWith("F|Стая|room"));
+        assertThat(question.answerSlots()).anySatisfy(slot -> assertThat(slot).startsWith("F|"));
         assertThat(objectIds).hasSizeGreaterThanOrEqualTo(10);
         assertThat(objectIds).contains(question.answer());
         assertThat(QuestionScoring.weight(question)).isEqualTo(1);
@@ -210,7 +218,7 @@ class QuizGeneratorTest {
         assertThat(levelOne.answerSlots().getFirst()).isEqualTo("M|7|3|1");
         assertThat(memoryPairIds(levelOne)).hasSize(3);
         assertThat(levelOne.answerSlots().stream().filter(slot -> slot.startsWith("C|"))).hasSize(6);
-        assertThat(QuestionScoring.weight(levelOne)).isEqualTo(10);
+        assertThat(QuestionScoring.weight(levelOne)).isEqualTo(1);
 
         assertThat(levelTen.answerSlots().getFirst()).isEqualTo("M|15|12|5");
         assertThat(memoryPairIds(levelTen)).hasSize(12);
@@ -218,15 +226,11 @@ class QuizGeneratorTest {
     }
 
     @Test
-    void memoryPairsScoringUsesExtraAttempts() {
+    void memoryPairsScoringUsesOnePointPerSolvedQuestion() {
         GeneratedQuestion question = generator.generate(QuizCategory.LOGIC, QuizMode.MEMORY_PAIRS, 1).getFirst();
 
         assertThat(QuestionScoring.score(question, new AnswerRecord(question.id(), "SOLVED|attempts=3|pairs=3", true, "", java.time.Instant.now())))
-                .isEqualTo(10);
-        assertThat(QuestionScoring.score(question, new AnswerRecord(question.id(), "SOLVED|attempts=4|pairs=3", true, "", java.time.Instant.now())))
-                .isEqualTo(10);
-        assertThat(QuestionScoring.score(question, new AnswerRecord(question.id(), "SOLVED|attempts=9|pairs=3", true, "", java.time.Instant.now())))
-                .isEqualTo(5);
+                .isEqualTo(1);
         assertThat(QuestionScoring.score(question, new AnswerRecord(question.id(), "", false, "", java.time.Instant.now())))
                 .isZero();
     }

@@ -19,7 +19,6 @@ import {
   Gem,
   MessageSquareText,
   Minus,
-  Palette,
   PlayCircle,
   Plus,
   Boxes,
@@ -54,6 +53,7 @@ const suggestionTarget = ref<'GENERAL' | 'SPECIFIC'>('SPECIFIC')
 const suggestionCategory = ref<QuizCategory>(quiz.selectedCategory)
 const suggestionSelectedMode = ref<QuizMode>(quiz.selectedMode)
 const suggestionDifficulty = ref(quiz.difficulty)
+const activeInfoMode = ref<QuizMode | null>(null)
 
 const subjectOptions = [
   { category: 'MATH' as QuizCategory, title: 'Математика', label: 'Числа и знаци', icon: Calculator, enabled: true },
@@ -124,18 +124,20 @@ const selectedRange = computed(() => {
   }
   return levelRange(quiz.difficulty, quiz.selectedCategory)
 })
-const selectedTaskLabel = computed(() => {
-  if (quiz.selectedCategory === 'MATH') {
-    return '20 задачи'
-  }
-  if (quiz.selectedCategory === 'LOGIC') {
-    return quiz.selectedMode === 'MEMORY_PAIRS' ? '1 игра' : '5 задачи'
-  }
-  return '10 задачи'
-})
 const planOptions = computed(() => quiz.selectedCategory === 'LOGIC' ? ['SINGLE'] : ['SINGLE', 'CUSTOM', 'ALL'])
 const suggestionModeOptions = computed(() => taskOptionsForCategory(suggestionCategory.value))
 const canStart = computed(() => quiz.testPlan !== 'CUSTOM' || quiz.selectedIncludedModes.length >= 2)
+const selectedQuestionCount = computed(() => questionCountForCurrentSelection())
+const testPlanSummary = computed(() => {
+  if (quiz.testPlan === 'CUSTOM') {
+    const names = quiz.selectedIncludedModes.map((mode) => modeLabels[mode]).join(', ')
+    return `Тестът ще съдържа ${selectedQuestionCount.value} задачи от избраните категории: ${names || 'избери категории'}.`
+  }
+  if (quiz.testPlan === 'ALL') {
+    return `Тестът ще съдържа ${selectedQuestionCount.value} задачи от всички типове в предмета.`
+  }
+  return `Тестът ще съдържа ${selectedQuestionCount.value} задачи: ${modeLabels[quiz.selectedMode]}.`
+})
 
 watch(
   () => quiz.selectedCategory,
@@ -225,6 +227,41 @@ function taskOptionsForCategory(category: QuizCategory) {
     return logicModeOptions
   }
   return mathModeOptions
+}
+
+function isGroupedMathMode(mode: QuizMode) {
+  return ['MIXED', 'UNKNOWN_MIXED', 'MULTIPLICATION_DIVISION'].includes(mode)
+}
+
+function questionCountForCurrentSelection() {
+  if (quiz.testPlan === 'CUSTOM' || quiz.testPlan === 'ALL') {
+    return 20
+  }
+  if (quiz.selectedCategory === 'MATH' && isGroupedMathMode(quiz.selectedMode)) {
+    return 20
+  }
+  return 10
+}
+
+function modeRule(mode: QuizMode) {
+  const rules: Partial<Record<QuizMode, string>> = {
+    WORD_LETTERS: 'Подреждаш буквите така, че да се получи думата към картинката.',
+    WORD_SYLLABLES: 'Подреждаш сричките в правилен ред и сглобяваш думата.',
+    WORD_TYPING: 'Гледаш картинката и изписваш думата самостоятелно.',
+    WORD_PICTURE: 'Четеш думата и избираш правилната картинка.',
+    WORD_MISSING_LETTER: 'Попълваш липсващата буква в думата.',
+    WORD_FIRST_LETTER_GROUP: 'Поставяш картинките в кошници според първата буква.',
+    WORD_WRONG_LETTER: 'Откриваш грешната буква и избираш с коя да се смени.',
+    FIND_OBJECT: 'Търсиш показания предмет в картинката и го натискаш.',
+    SPOT_DIFFERENCES: 'Маркираш всички разлики между двете картинки.',
+    MEMORY_PAIRS: 'Запомняш картите и отваряш еднаквите двойки.',
+    PATTERN_SEQUENCE: 'Запомняш модела и подреждаш фигурите в същия ред.'
+  }
+  return rules[mode] ?? ''
+}
+
+function toggleModeInfo(mode: QuizMode) {
+  activeInfoMode.value = activeInfoMode.value === mode ? null : mode
 }
 
 function formatDateTime(value: string) {
@@ -321,23 +358,9 @@ async function submitSuggestion() {
           </button>
         </div>
 
-        <div class="category-band">
-          <span>{{ selectedTaskLabel }}</span>
-          <span>Проверка сега или на финала</span>
-          <span v-if="quiz.testPlan === 'CUSTOM'">Без класация</span>
-          <span v-else>Кристали за всеки завършен тест</span>
-        </div>
-
-        <div class="section-block">
-          <RouterLink class="alphabet-link reward-link" :to="{ name: 'rewardAlbum' }">
-            <Palette :size="30" />
-            <span>
-              <strong>Моят албум</strong>
-              <small>Създай картини с кристали</small>
-            </span>
-            <ArrowRight :size="21" />
-          </RouterLink>
-        </div>
+        <p class="plan-summary">
+          {{ testPlanSummary }} За завършен тест се печелят кристали, с които се купуват картинки и се подреждат албуми.
+        </p>
 
         <div v-if="quiz.selectedCategory === 'MATH'" class="section-block">
           <RouterLink class="alphabet-link" :to="{ name: 'numbers' }">
@@ -388,7 +411,20 @@ async function submitSuggestion() {
               @click="quiz.selectedMode = option.mode"
             >
               <component :is="option.icon" :size="24" />
-              <span>{{ modeLabels[option.mode] }}</span>
+              <span class="mode-name">
+                {{ modeLabels[option.mode] }}
+                <HelpCircle
+                  v-if="modeRule(option.mode)"
+                  class="mode-info-icon"
+                  :size="16"
+                  :title="modeRule(option.mode)"
+                  role="button"
+                  tabindex="0"
+                  @click.stop="toggleModeInfo(option.mode)"
+                  @keydown.enter.stop.prevent="toggleModeInfo(option.mode)"
+                  @keydown.space.stop.prevent="toggleModeInfo(option.mode)"
+                />
+              </span>
               <small>{{ modeShortLabels[option.mode] }}</small>
             </button>
           </div>
@@ -402,7 +438,20 @@ async function submitSuggestion() {
               @click="toggleIncluded(option.mode)"
             >
               <component :is="option.icon" :size="24" />
-              <span>{{ modeLabels[option.mode] }}</span>
+              <span class="mode-name">
+                {{ modeLabels[option.mode] }}
+                <HelpCircle
+                  v-if="modeRule(option.mode)"
+                  class="mode-info-icon"
+                  :size="16"
+                  :title="modeRule(option.mode)"
+                  role="button"
+                  tabindex="0"
+                  @click.stop="toggleModeInfo(option.mode)"
+                  @keydown.enter.stop.prevent="toggleModeInfo(option.mode)"
+                  @keydown.space.stop.prevent="toggleModeInfo(option.mode)"
+                />
+              </span>
               <small>{{ quiz.selectedIncludedModes.includes(option.mode) ? 'Включено' : 'Изключено' }}</small>
             </button>
           </div>
@@ -415,6 +464,9 @@ async function submitSuggestion() {
           </div>
           <p v-if="quiz.testPlan === 'CUSTOM' && !canStart" class="helper-warning">
             Избери поне две категории.
+          </p>
+          <p v-if="activeInfoMode && modeRule(activeInfoMode)" class="mode-rule">
+            {{ modeLabels[activeInfoMode] }}: {{ modeRule(activeInfoMode) }}
           </p>
         </div>
 
@@ -601,20 +653,12 @@ async function submitSuggestion() {
   text-transform: uppercase;
 }
 
-.category-band {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.plan-summary {
+  margin: 0;
   padding: 0 20px;
-}
-
-.category-band span {
-  border: 1px solid rgba(36, 48, 74, 0.12);
-  border-radius: 999px;
-  padding: 8px 12px;
-  background: #ffffff;
   color: var(--muted);
   font-weight: 800;
+  line-height: 1.45;
 }
 
 .subject-grid {
@@ -759,6 +803,26 @@ async function submitSuggestion() {
   line-height: 1.15;
 }
 
+.mode-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mode-info-icon {
+  flex: 0 0 auto;
+  color: currentColor;
+  opacity: 0.7;
+}
+
+.mode-info-icon:hover,
+.mode-info-icon:focus {
+  opacity: 1;
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
 .mode-card small {
   color: var(--muted);
   font-weight: 800;
@@ -831,6 +895,13 @@ async function submitSuggestion() {
   color: #8a4e00;
   background: rgba(245, 185, 66, 0.18);
   font-weight: 800;
+}
+
+.mode-rule {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 800;
+  line-height: 1.45;
 }
 
 input[type='range'] {

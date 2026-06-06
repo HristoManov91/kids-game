@@ -9,28 +9,12 @@ public final class QuestionScoring {
     }
 
     public static int weight(GeneratedQuestion question) {
-        if (question.kind() == QuestionKind.SPOT_DIFFERENCES) {
-            return listAnswer(question.answer()).size();
-        }
-        if (question.kind() == QuestionKind.MEMORY_PAIRS) {
-            return 10;
-        }
         return 1;
     }
 
     public static int score(GeneratedQuestion question, AnswerRecord answer) {
         if (answer == null) {
             return 0;
-        }
-        if (question.kind() == QuestionKind.SPOT_DIFFERENCES) {
-            Set<String> correct = listAnswer(question.answer());
-            Set<String> selected = listAnswer(answer.answer());
-            long correctSelected = selected.stream().filter(correct::contains).count();
-            long wrongSelected = selected.stream().filter(selection -> !correct.contains(selection)).count();
-            return Math.max(0, Math.toIntExact(correctSelected - wrongSelected));
-        }
-        if (question.kind() == QuestionKind.MEMORY_PAIRS) {
-            return memoryPairsScore(question, answer.answer());
         }
         return answer.correct() ? 1 : 0;
     }
