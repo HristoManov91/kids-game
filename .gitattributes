@@ -33,6 +33,9 @@ saved_model/**/* filter=lfs diff=lfs merge=lfs -text
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.zst filter=lfs diff=lfs merge=lfs -text
 *tfevents* filter=lfs diff=lfs merge=lfs -text
+frontend/node_modules/@rolldown/binding-darwin-arm64/rolldown-binding.darwin-arm64.node filter=lfs diff=lfs merge=lfs -text
+frontend/node_modules/fsevents/fsevents.node filter=lfs diff=lfs merge=lfs -text
+frontend/node_modules/lightningcss-darwin-arm64/lightningcss.darwin-arm64.node filter=lfs diff=lfs merge=lfs -text
 frontend/public/reward-assets/polished/farm/goose.png filter=lfs diff=lfs merge=lfs -text
 frontend/public/reward-assets/polished/farm/hen-white.png filter=lfs diff=lfs merge=lfs -text
 frontend/public/reward-assets/polished/farm/sheep-ram.png filter=lfs diff=lfs merge=lfs -text
