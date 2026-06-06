@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { AlertTriangle, ArrowRight, Check, Clock, Flag } from 'lucide-vue-next'
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, Clock, Flag } from 'lucide-vue-next'
 import MascotFigure from '@/components/MascotFigure.vue'
 import PictureGlyph from '@/components/PictureGlyph.vue'
 import { useQuizStore } from '@/stores/quiz'
@@ -148,41 +148,17 @@ const currentAnswer = computed(() => {
   const question = currentQuestion.value
   return question ? quiz.answerMap.get(question.id) : undefined
 })
-const answeredCount = computed(() => {
-  let count = 0
-  questions.value.forEach((question) => {
-    const savedAnswer = quiz.answerMap.get(question.id)
-    const draftAnswer = draftAnswers.value[question.id]
-    if (isSpotDifferencesKind(question)) {
-      count += savedAnswer
-        ? spotAnswerProgress(question, savedAnswer.answer)
-        : spotDraftProgress(question, draftAnswer)
-      return
-    }
-    if (isMemoryPairsKind(question)) {
-      if (savedAnswer || isMemorySolved(question)) {
-        count += memoryQuestionWeight(question)
-      }
-      return
-    }
-    if (savedAnswer || isDraftAnswerComplete(question, draftAnswer)) {
-      count += 1
-    }
-  })
-  return count
-})
+const questionCompletion = computed(() => questions.value.map((question) => isQuestionAnswered(question)))
+const answeredCount = computed(() => questionCompletion.value.filter(Boolean).length)
+const unansweredQuestionIndexes = computed(() => questionCompletion.value
+  .map((answered, questionIndex) => answered ? -1 : questionIndex)
+  .filter((questionIndex) => questionIndex >= 0))
 const progressPercent = computed(() => {
-  if (isMemoryPairsQuestion.value && memoryGame.value.pairCount > 0) {
-    return Math.round((memoryMatched.value.length / memoryGame.value.pairCount) * 100)
-  }
-  const total = attempt.value?.totalQuestions ?? 20
+  const total = questions.value.length || attempt.value?.totalQuestions || 20
   return Math.round((answeredCount.value / total) * 100)
 })
 const progressLabel = computed(() => {
-  if (isMemoryPairsQuestion.value) {
-    return `${memoryMatched.value.length}/${memoryGame.value.pairCount} двойки`
-  }
-  return `${answeredCount.value}/${attempt.value?.totalQuestions ?? 20}`
+  return `${answeredCount.value}/${questions.value.length || attempt.value?.totalQuestions || 20}`
 })
 const promptParts = computed(() => currentQuestion.value?.prompt.split('?') ?? ['', ''])
 const isWordQuestion = computed(() => isWordKind(currentQuestion.value))
@@ -574,6 +550,9 @@ function isDraftAnswerComplete(question: QuestionResponse, answer: string | unde
   if (isPatternSequenceKind(question)) {
     return isPatternComplete(question)
   }
+  if (isSpotDifferencesKind(question)) {
+    return parseSpotDifferenceAnswer(answer).length >= parseSpotDifferenceScene(question).differenceIds.length
+  }
   if (!answer?.trim()) {
     return false
   }
@@ -582,6 +561,20 @@ function isDraftAnswerComplete(question: QuestionResponse, answer: string | unde
     return Boolean(wrongLetter && replacementLetter)
   }
   return true
+}
+
+function isQuestionAnswered(question: QuestionResponse) {
+  if (quiz.answerMap.has(question.id)) {
+    return true
+  }
+  if (isSpotDifferencesKind(question)) {
+    const selected = spotDifferenceAnswers.value[question.id] ?? parseSpotDifferenceAnswer(draftAnswers.value[question.id])
+    return selected.length >= parseSpotDifferenceScene(question).differenceIds.length
+  }
+  if (isMemoryPairsKind(question)) {
+    return isMemorySolved(question)
+  }
+  return isDraftAnswerComplete(question, draftAnswers.value[question.id])
 }
 
 function isWordKind(question: QuestionResponse | null | undefined) {
@@ -653,10 +646,6 @@ function parseMemoryGame(question: QuestionResponse): MemoryGame {
     game.pairCount = new Set(game.cards.map((card) => card.pairId)).size
   }
   return game
-}
-
-function memoryQuestionWeight(question: QuestionResponse) {
-  return isMemoryPairsKind(question) ? 10 : 1
 }
 
 function ensureMemoryState(question: QuestionResponse) {
@@ -1244,7 +1233,7 @@ function spotObjectClass(item: SpotDifferenceObject) {
 
 function spotMarker(item: SpotDifferenceObject) {
   if (!currentAnswer.value) {
-    return selectedSpotDifferences.value.includes(item.selectionKey) ? '✓' : ''
+    return selectedSpotDifferences.value.includes(item.selectionKey) ? '○' : ''
   }
   const correctIds = parseSpotDifferenceAnswer(currentAnswer.value.correctAnswer)
   const selected = selectedSpotDifferences.value.includes(item.selectionKey)
@@ -1776,16 +1765,24 @@ function isGroupingComplete(question: QuestionResponse) {
   return groupingQuestionItems(question).every((item) => Boolean(assignments[item.word]))
 }
 
-async function nextQuestion() {
+async function goToQuestion(nextIndex: number) {
   if (checking.value || finishing.value) {
     return
   }
   if (!(await saveCurrentAnswerIfReady())) {
     return
   }
-  if (index.value < questions.value.length - 1) {
-    index.value += 1
+  if (nextIndex >= 0 && nextIndex < questions.value.length) {
+    index.value = nextIndex
   }
+}
+
+async function previousQuestion() {
+  await goToQuestion(index.value - 1)
+}
+
+async function nextQuestion() {
+  await goToQuestion(index.value + 1)
 }
 
 async function handleEnter() {
@@ -1793,9 +1790,20 @@ async function handleEnter() {
 }
 
 async function finishQuiz() {
-  if (isMemoryPairsQuestion.value && !isMemorySolved(currentQuestion.value)) {
-    error.value = 'Първо отвори всички двойки.'
+  if (checking.value || finishing.value) {
     return
+  }
+  if (!(await saveCurrentAnswerIfReady())) {
+    return
+  }
+  const unanswered = unansweredQuestionIndexes.value
+  if (unanswered.length > 0) {
+    const shouldFinish = window.confirm(`Има ${unanswered.length} задачи без отговор. Искаш ли да завършиш теста въпреки това?`)
+    if (!shouldFinish) {
+      index.value = unanswered[0]
+      error.value = 'Продължи от първата задача без отговор.'
+      return
+    }
   }
   finishing.value = true
   try {
@@ -1858,6 +1866,19 @@ async function submitIssueReport() {
           <strong>{{ progressLabel }}</strong>
         </div>
 
+        <div class="question-jump-list" aria-label="Навигация по задачи">
+          <button
+            v-for="(question, questionIndex) in questions"
+            :key="question.id"
+            type="button"
+            :class="{ current: questionIndex === index, answered: questionCompletion[questionIndex] }"
+            :aria-label="`Задача ${questionIndex + 1}${questionCompletion[questionIndex] ? ' отговорена' : ' без отговор'}`"
+            @click="goToQuestion(questionIndex)"
+          >
+            {{ questionIndex + 1 }}
+          </button>
+        </div>
+
         <div class="question-body">
           <p class="question-number">Задача {{ index + 1 }}</p>
           <template v-if="isFindObjectQuestion">
@@ -1878,7 +1899,7 @@ async function submitIssueReport() {
                 {{ currentAnswer.correct ? 'Откри го!' : 'Виж къде е верният предмет.' }}
               </template>
               <template v-else>
-                Разгледай стаята и натисни предмета.
+                Разгледай картинката и натисни предмета.
               </template>
             </p>
             <section class="find-object-scene" :class="findObjectScene.theme" :aria-label="findObjectScene.name || 'Стая'">
@@ -2278,13 +2299,22 @@ async function submitIssueReport() {
           <button
             class="button secondary"
             type="button"
+            :disabled="checking || finishing || index <= 0"
+            @click="previousQuestion"
+          >
+            <ArrowLeft :size="20" />
+            <span>Предишна</span>
+          </button>
+          <button
+            class="button secondary"
+            type="button"
             :disabled="checking || finishing || index >= questions.length - 1"
             @click="nextQuestion"
           >
             <ArrowRight :size="20" />
             <span>Следваща</span>
           </button>
-          <button class="button coral" type="button" :disabled="finishing || (isMemoryPairsQuestion && !isMemorySolved(currentQuestion)) || (isPatternSequenceQuestion && patternPreviewActive)" @click="finishQuiz">
+          <button class="button coral" type="button" :disabled="finishing || (isPatternSequenceQuestion && patternPreviewActive)" @click="finishQuiz">
             <Flag :size="20" />
             <span>Край на теста</span>
           </button>
@@ -2409,6 +2439,34 @@ async function submitIssueReport() {
   transition: width 220ms ease;
 }
 
+.question-jump-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
+  gap: 6px;
+}
+
+.question-jump-list button {
+  display: grid;
+  min-width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(36, 48, 74, 0.14);
+  border-radius: 50%;
+  color: var(--muted);
+  background: #ffffff;
+  font-weight: 900;
+}
+
+.question-jump-list button.answered {
+  color: #ffffff;
+  background: var(--green);
+}
+
+.question-jump-list button.current {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(63, 125, 217, 0.18);
+}
+
 .question-body {
   display: grid;
   gap: 18px;
@@ -2518,6 +2576,37 @@ h1 {
   border: 4px solid rgba(63, 125, 217, 0.18);
   border-radius: var(--radius);
   background: linear-gradient(135deg, rgba(223, 246, 255, 0.92), rgba(255, 255, 255, 0.78));
+}
+
+.find-object-scene.park {
+  background:
+    linear-gradient(180deg, rgba(201, 237, 255, 0.95) 0 42%, rgba(192, 232, 157, 0.96) 42% 100%),
+    repeating-linear-gradient(90deg, rgba(36, 48, 74, 0.05) 0 1px, transparent 1px 64px);
+}
+
+.find-object-scene.park::before {
+  bottom: 18%;
+  background: rgba(70, 142, 78, 0.25);
+}
+
+.find-object-scene.park::after {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.find-object-scene.beach {
+  background:
+    linear-gradient(180deg, rgba(190, 235, 255, 0.95) 0 38%, rgba(114, 205, 229, 0.85) 38% 56%, rgba(250, 221, 158, 0.96) 56% 100%),
+    repeating-linear-gradient(90deg, rgba(36, 48, 74, 0.04) 0 1px, transparent 1px 62px);
+}
+
+.find-object-scene.beach::before {
+  bottom: 41%;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.find-object-scene.beach::after {
+  display: none;
 }
 
 .find-object-item {

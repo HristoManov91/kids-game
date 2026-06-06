@@ -40,7 +40,7 @@ async function submit() {
 
     <form class="login-panel panel" @submit.prevent="submit">
       <h2>Регистрация</h2>
-      <p class="muted">Избери лесен акаунт и парола.</p>
+      <p class="muted">Акаунтът трябва да е между 3 и 60 символа. Паролата трябва да е между 4 и 120 символа.</p>
 
       <div v-if="error" class="error">{{ error }}</div>
 

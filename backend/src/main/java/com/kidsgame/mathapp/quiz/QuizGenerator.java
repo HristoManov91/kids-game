@@ -17,8 +17,9 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class QuizGenerator {
     public static final int QUESTIONS_PER_TEST = 20;
+    public static final int SINGLE_QUESTIONS_PER_TEST = 10;
     public static final int BULGARIAN_QUESTIONS_PER_TEST = 10;
-    public static final int LOGIC_QUESTIONS_PER_TEST = 5;
+    public static final int LOGIC_QUESTIONS_PER_TEST = 10;
     private static final Locale BG = Locale.forLanguageTag("bg-BG");
 
     public static final List<QuizMode> MATH_LINEAR_MODES = List.of(
@@ -84,12 +85,12 @@ public class QuizGenerator {
     public List<GeneratedQuestion> generate(QuizCategory category, QuizMode mode, int difficulty) {
         if (category == QuizCategory.BULGARIAN) {
             if (mode == QuizMode.ALL_GROUP) {
-                return generateBulgarian(BULGARIAN_PRIMITIVE_MODES, difficulty);
+                return generateBulgarian(BULGARIAN_PRIMITIVE_MODES, difficulty, QUESTIONS_PER_TEST);
             }
             if (mode == QuizMode.CUSTOM_GROUP) {
                 throw new IllegalArgumentException("Тестовете по избор трябва да имат избрани категории.");
             }
-            return generateBulgarian(List.of(mode), difficulty);
+            return generateBulgarian(List.of(mode), difficulty, BULGARIAN_QUESTIONS_PER_TEST);
         }
         if (category == QuizCategory.LOGIC) {
             if (mode == QuizMode.ALL_GROUP) {
@@ -102,21 +103,21 @@ public class QuizGenerator {
         }
 
         if (mode == QuizMode.ALL_GROUP) {
-            return generate(MATH_LINEAR_MODES, difficulty);
+            return generateMath(MATH_LINEAR_MODES, difficulty, QUESTIONS_PER_TEST);
         }
         if (mode == QuizMode.CUSTOM_GROUP) {
             throw new IllegalArgumentException("Тестовете по избор трябва да имат избрани категории.");
         }
         if (mode == QuizMode.MIXED) {
-            return generate(List.of(QuizMode.ADDITION, QuizMode.SUBTRACTION), difficulty);
+            return generateMath(List.of(QuizMode.ADDITION, QuizMode.SUBTRACTION), difficulty, QUESTIONS_PER_TEST);
         }
         if (mode == QuizMode.UNKNOWN_MIXED) {
-            return generate(List.of(QuizMode.UNKNOWN_ADDITION, QuizMode.UNKNOWN_SUBTRACTION), difficulty);
+            return generateMath(List.of(QuizMode.UNKNOWN_ADDITION, QuizMode.UNKNOWN_SUBTRACTION), difficulty, QUESTIONS_PER_TEST);
         }
         if (mode == QuizMode.MULTIPLICATION_DIVISION) {
-            return generate(List.of(QuizMode.MULTIPLICATION, QuizMode.DIVISION), difficulty);
+            return generateMath(List.of(QuizMode.MULTIPLICATION, QuizMode.DIVISION), difficulty, QUESTIONS_PER_TEST);
         }
-        return generate(List.of(mode), difficulty);
+        return generateMath(List.of(mode), difficulty, SINGLE_QUESTIONS_PER_TEST);
     }
 
     public List<GeneratedQuestion> generate(Collection<QuizMode> modes, int difficulty) {
@@ -125,12 +126,16 @@ public class QuizGenerator {
 
     public List<GeneratedQuestion> generate(QuizCategory category, Collection<QuizMode> modes, int difficulty) {
         if (category == QuizCategory.BULGARIAN) {
-            return generateBulgarian(modes, difficulty);
+            return generateBulgarian(modes, difficulty, QUESTIONS_PER_TEST);
         }
         if (category == QuizCategory.LOGIC) {
             return generateLogic(modes, difficulty);
         }
 
+        return generateMath(modes, difficulty, QUESTIONS_PER_TEST);
+    }
+
+    private List<GeneratedQuestion> generateMath(Collection<QuizMode> modes, int difficulty, int questionCount) {
         int max = difficulty * 10;
         ThreadLocalRandom random = ThreadLocalRandom.current();
         List<QuizMode> availableModes = modes.stream()
@@ -144,7 +149,7 @@ public class QuizGenerator {
         Set<String> usedPrompts = new LinkedHashSet<>();
 
         int attempts = 0;
-        while (questions.size() < QUESTIONS_PER_TEST && attempts < QUESTIONS_PER_TEST * 80) {
+        while (questions.size() < questionCount && attempts < questionCount * 80) {
             GeneratedQuestion candidate = nextQuestion(questions.size() + 1, pickMode(availableModes, random), max, random);
             attempts++;
             if (usedPrompts.add(candidate.sourceMode() + ":" + candidate.prompt())) {
@@ -152,7 +157,7 @@ public class QuizGenerator {
             }
         }
 
-        while (questions.size() < QUESTIONS_PER_TEST) {
+        while (questions.size() < questionCount) {
             questions.add(nextQuestion(questions.size() + 1, pickMode(availableModes, random), max, random));
         }
 
@@ -232,7 +237,7 @@ public class QuizGenerator {
         return new GeneratedQuestion(id, QuestionKind.NUMERIC, prompt, null, null, List.of(), List.of(), String.valueOf(answer), sourceMode);
     }
 
-    private List<GeneratedQuestion> generateBulgarian(Collection<QuizMode> modes, int difficulty) {
+    private List<GeneratedQuestion> generateBulgarian(Collection<QuizMode> modes, int difficulty, int questionCount) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         List<QuizMode> availableModes = modes.stream()
                 .filter(BULGARIAN_PRIMITIVE_MODES::contains)
@@ -246,7 +251,7 @@ public class QuizGenerator {
         Set<String> usedWords = new LinkedHashSet<>();
 
         int attempts = 0;
-        while (questions.size() < BULGARIAN_QUESTIONS_PER_TEST && attempts < BULGARIAN_QUESTIONS_PER_TEST * 80) {
+        while (questions.size() < questionCount && attempts < questionCount * 80) {
             QuizMode mode = pickMode(availableModes, random);
             List<BulgarianWordCatalog.BulgarianWordEntry> words = wordPool(mode, difficulty, random);
             BulgarianWordCatalog.BulgarianWordEntry word = words.get(random.nextInt(words.size()));
@@ -256,7 +261,7 @@ public class QuizGenerator {
             }
         }
 
-        while (questions.size() < BULGARIAN_QUESTIONS_PER_TEST) {
+        while (questions.size() < questionCount) {
             QuizMode mode = pickMode(availableModes, random);
             List<BulgarianWordCatalog.BulgarianWordEntry> words = wordPool(mode, difficulty, random);
             BulgarianWordCatalog.BulgarianWordEntry word = words.get(random.nextInt(words.size()));
@@ -768,10 +773,6 @@ public class QuizGenerator {
         if (availableModes.isEmpty()) {
             throw new IllegalArgumentException("At least one logic question category is required.");
         }
-        if (availableModes.size() == 1 && availableModes.contains(QuizMode.MEMORY_PAIRS)) {
-            return List.of(memoryPairsQuestion(1, difficulty, random));
-        }
-
         List<GeneratedQuestion> questions = new ArrayList<>();
         while (questions.size() < LOGIC_QUESTIONS_PER_TEST) {
             QuizMode mode = pickMode(availableModes, random);
@@ -792,7 +793,7 @@ public class QuizGenerator {
         PatternLevel level = patternLevel(difficulty);
         int sequenceLength = level.sequenceLength();
         int previewSeconds = level.previewSeconds();
-        List<PatternToken> tokenPool = patternTokenPool(level);
+        List<PatternToken> tokenPool = patternTokenPool(level, random);
         List<PatternToken> sequence = patternSequence(tokenPool, level, random);
 
         Set<String> usedIds = sequence.stream()
@@ -916,7 +917,7 @@ public class QuizGenerator {
                 .toList();
     }
 
-    private List<PatternToken> patternTokenPool(PatternLevel level) {
+    private List<PatternToken> patternTokenPool(PatternLevel level, ThreadLocalRandom random) {
         List<PatternColor> colors = List.of(
                 new PatternColor("red", "#ef4444", "червен"),
                 new PatternColor("yellow", "#f5c542", "жълт"),
@@ -932,9 +933,13 @@ public class QuizGenerator {
                 new PatternShape("square", "квадрат"),
                 new PatternShape("triangle", "триъгълник")
         );
+        List<PatternColor> selectedColors = new ArrayList<>(colors);
+        List<PatternShape> selectedShapes = new ArrayList<>(shapes);
+        Collections.shuffle(selectedColors, random);
+        Collections.shuffle(selectedShapes, random);
         List<PatternToken> tokens = new ArrayList<>();
-        for (PatternShape shape : shapes.stream().limit(level.shapeCount()).toList()) {
-            for (PatternColor color : colors.stream().limit(level.colorCount()).toList()) {
+        for (PatternShape shape : selectedShapes.stream().limit(level.shapeCount()).toList()) {
+            for (PatternColor color : selectedColors.stream().limit(level.colorCount()).toList()) {
                 tokens.add(new PatternToken(
                         color.id() + "-" + shape.id(),
                         shape.id(),
@@ -1055,7 +1060,7 @@ public class QuizGenerator {
     }
 
     private GeneratedQuestion findObjectQuestion(int id, int difficulty, ThreadLocalRandom random) {
-        FindObjectScene scene = findObjectScene();
+        FindObjectScene scene = findObjectScene(random);
         List<FindObjectItem> available = scene.objects().stream()
                 .filter(object -> object.minDifficulty() <= difficulty)
                 .toList();
@@ -1207,7 +1212,7 @@ public class QuizGenerator {
 
     private GeneratedQuestion spotDifferencesQuestion(int id, int difficulty, ThreadLocalRandom random) {
         List<SpotSceneTemplate> scenes = spotScenes();
-        SpotSceneTemplate scene = scenes.get(Math.floorMod(difficulty - 1, scenes.size()));
+        SpotSceneTemplate scene = scenes.get(random.nextInt(scenes.size()));
         int differenceCount = spotDifferenceCount(difficulty);
         List<SpotObject> shuffledObjects = new ArrayList<>(scene.objects());
         Collections.shuffle(shuffledObjects, random);
@@ -1576,11 +1581,17 @@ public class QuizGenerator {
         );
     }
 
-    private FindObjectScene findObjectScene() {
-        return new FindObjectScene(
-                "Стая",
-                "room",
-                List.of(
+    private FindObjectScene findObjectScene(ThreadLocalRandom random) {
+        List<FindObjectScene> scenes = findObjectScenes();
+        return scenes.get(random.nextInt(scenes.size()));
+    }
+
+    private List<FindObjectScene> findObjectScenes() {
+        return List.of(
+                new FindObjectScene(
+                        "Стая",
+                        "room",
+                        List.of(
                         new FindObjectItem("bed", "🛏️", "легло", "леглото", 76, 68, 54, 1),
                         new FindObjectItem("teddy", "🧸", "мече", "мечето", 66, 58, 52, 1),
                         new FindObjectItem("red-car", "🚗", "червена кола", "червената кола", 14, 84, 40, 1),
@@ -1629,6 +1640,53 @@ public class QuizGenerator {
                         new FindObjectItem("bell", "🔔", "звънче", "звънчето", 58, 34, 36, 9),
                         new FindObjectItem("map", "🗺️", "карта", "картата", 38, 34, 38, 9),
                         new FindObjectItem("toolbox", "🧰", "кутия с инструменти", "кутията с инструменти", 59, 72, 36, 9)
+                        )
+                ),
+                new FindObjectScene(
+                        "Парк",
+                        "park",
+                        List.of(
+                        new FindObjectItem("tree", "🌳", "дърво", "дървото", 18, 62, 58, 1),
+                        new FindObjectItem("pine", "🌲", "бор", "бора", 88, 60, 50, 1),
+                        new FindObjectItem("flower", "🌷", "цвете", "цветето", 35, 72, 42, 1),
+                        new FindObjectItem("sun", "☀️", "слънце", "слънцето", 84, 16, 52, 1),
+                        new FindObjectItem("bird", "🐦", "птичка", "птичката", 35, 38, 34, 1),
+                        new FindObjectItem("dog", "🐕", "куче", "кучето", 50, 82, 40, 1),
+                        new FindObjectItem("mushroom", "🍄", "гъбка", "гъбката", 12, 84, 34, 2),
+                        new FindObjectItem("bench", "🪑", "пейка", "пейката", 74, 82, 38, 2),
+                        new FindObjectItem("butterfly", "🦋", "пеперуда", "пеперудата", 52, 32, 38, 2),
+                        new FindObjectItem("apple", "🍎", "ябълка", "ябълката", 24, 82, 34, 2),
+                        new FindObjectItem("kite", "🪁", "хвърчило", "хвърчилото", 68, 28, 40, 3),
+                        new FindObjectItem("slide", "🛝", "пързалка", "пързалката", 26, 54, 44, 3),
+                        new FindObjectItem("ball", "⚽", "топка", "топката", 62, 75, 42, 3),
+                        new FindObjectItem("cloud", "☁️", "облак", "облака", 22, 18, 52, 4),
+                        new FindObjectItem("house", "🏠", "къща", "къщата", 78, 62, 54, 4),
+                        new FindObjectItem("leaf", "🍂", "лист", "листа", 58, 88, 30, 5),
+                        new FindObjectItem("bee", "🐝", "пчела", "пчелата", 48, 42, 32, 6),
+                        new FindObjectItem("squirrel", "🐿️", "катеричка", "катеричката", 69, 70, 36, 7)
+                        )
+                ),
+                new FindObjectScene(
+                        "Плаж",
+                        "beach",
+                        List.of(
+                        new FindObjectItem("umbrella", "🏖️", "чадър", "чадъра", 24, 62, 58, 1),
+                        new FindObjectItem("boat", "⛵", "лодка", "лодката", 64, 52, 52, 1),
+                        new FindObjectItem("fish", "🐟", "риба", "рибата", 47, 76, 40, 1),
+                        new FindObjectItem("crab", "🦀", "рак", "рака", 78, 78, 42, 1),
+                        new FindObjectItem("shell", "🐚", "мида", "мидата", 36, 84, 34, 1),
+                        new FindObjectItem("bucket", "🪣", "кофичка", "кофичката", 14, 82, 38, 2),
+                        new FindObjectItem("starfish", "⭐", "морска звезда", "морската звезда", 72, 86, 34, 2),
+                        new FindObjectItem("palm", "🌴", "палма", "палмата", 88, 64, 54, 2),
+                        new FindObjectItem("sandcastle", "🏰", "замък", "замъка", 50, 88, 40, 3),
+                        new FindObjectItem("drink", "🥤", "напитка", "напитката", 28, 84, 34, 3),
+                        new FindObjectItem("glasses", "🕶️", "очила", "очилата", 40, 66, 34, 3),
+                        new FindObjectItem("beach-ball", "🏐", "плажна топка", "плажната топка", 68, 72, 38, 4),
+                        new FindObjectItem("icecream", "🍦", "сладолед", "сладоледа", 86, 84, 34, 4),
+                        new FindObjectItem("towel", "🟨", "кърпа", "кърпата", 18, 82, 38, 5),
+                        new FindObjectItem("small-fish", "🐠", "шарена риба", "шарената риба", 57, 82, 34, 6),
+                        new FindObjectItem("sun", "☀️", "слънце", "слънцето", 82, 16, 52, 7)
+                        )
                 )
         );
     }
