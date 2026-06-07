@@ -85,4 +85,8 @@ public class UserEntity {
     public void updatePassword(String passwordHash) {
         this.passwordHash = passwordHash;
     }
+
+    public void updateRole(Role role) {
+        this.role = role;
+    }
 }

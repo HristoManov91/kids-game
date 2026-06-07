@@ -11,6 +11,7 @@ spring:
     password: ${DB_PASSWORD:kids}
   flyway:
     enabled: true
+    repair-on-start: ${APP_FLYWAY_REPAIR_ON_START:false}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -23,7 +24,10 @@ app:
   demo:
     seed-enabled: ${APP_DEMO_SEED_ENABLED:false}
   admin:
-    usernames: ${APP_ADMIN_USERNAMES:христо}
+    bootstrap:
+      username: ${APP_ADMIN_USERNAME:}
+      password: ${APP_ADMIN_PASSWORD:}
+      display-name: ${APP_ADMIN_DISPLAY_NAME:Администратор}
   security:
     jwt-secret: ${APP_JWT_SECRET:local-dev-secret-change-before-deploying-this-app-please}
     token-ttl-hours: ${APP_TOKEN_TTL_HOURS:12}

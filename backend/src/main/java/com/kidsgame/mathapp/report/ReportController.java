@@ -31,13 +31,13 @@ public class ReportController {
     }
 
     @GetMapping("/children")
-    @PreAuthorize("hasRole('PARENT')")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> children() {
         return reportService.children();
     }
 
     @GetMapping("/children/{childId}/attempts")
-    @PreAuthorize("hasRole('PARENT')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ChildReportResponse childReport(
             @PathVariable Long childId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
@@ -51,7 +51,7 @@ public class ReportController {
     }
 
     @GetMapping("/children/{childId}/attempts/{attemptId}")
-    @PreAuthorize("hasRole('PARENT')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ReportAttemptDetailResponse attemptDetail(@PathVariable Long childId, @PathVariable UUID attemptId) {
         return reportService.attemptDetail(childId, attemptId);
     }

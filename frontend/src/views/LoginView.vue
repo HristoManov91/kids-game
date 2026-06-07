@@ -38,7 +38,7 @@ function fillDemo(nextUsername: string, nextPassword: string) {
         <span>Учене с награди</span>
       </div>
       <h1>Задачки за малки шампиони</h1>
-      <p>Решавай математика, български и логически игри, печели кристали и подреждай собствени албуми с награди.</p>
+      <p>Решавай задачи, печели кристали и създавай собствени албуми с картинки.</p>
     </div>
 
     <form class="login-panel panel" @submit.prevent="submit">

@@ -129,7 +129,7 @@ class SecurityConfigTest {
     void allowsAdminCatalogForConfiguredAdmins() throws Exception {
         when(adminAccess.isAdmin(any(Authentication.class))).thenReturn(true);
 
-        mockMvc.perform(get("/api/admin/reward-catalog").with(user(principal("hristo", Role.PARENT))))
+        mockMvc.perform(get("/api/admin/reward-catalog").with(user(principal("site-admin", Role.ADMIN))))
                 .andExpect(status().isOk());
     }
 

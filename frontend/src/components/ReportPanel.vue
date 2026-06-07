@@ -14,20 +14,26 @@ import {
   ThumbsUp
 } from 'lucide-vue-next'
 import { api } from '@/services/api'
+import { isAdminUser } from '@/services/admin'
 import { bulgarianPrimitiveModes, categoryLabels, formatDuration, logicPrimitiveModes, mathPrimitiveModes, modeLabels, primitiveModes } from '@/services/labels'
-import type { ChildReportResponse, QuizCategory, QuizMode, ReportAttemptRow, ReportFocusArea } from '@/types'
+import { useAuthStore } from '@/stores/auth'
+import type { ChildReportResponse, QuizCategory, QuizMode, ReportAttemptRow, ReportFocusArea, UserResponse } from '@/types'
 
+const auth = useAuthStore()
 const fromDate = ref(today())
 const toDate = ref(today())
 const category = ref<'ALL' | QuizCategory>('ALL')
 const selectedModes = ref<QuizMode[]>([])
 const difficulty = ref<'ALL' | number>('ALL')
+const children = ref<UserResponse[]>([])
+const selectedChildId = ref<number | null>(null)
 const report = ref<ChildReportResponse | null>(null)
 const loading = ref(false)
 const error = ref('')
 const page = ref(1)
 const pageSize = ref(10)
 const modeSelect = ref<HTMLDetailsElement | null>(null)
+const isAdminReport = computed(() => isAdminUser(auth.user))
 
 const modeOptions = computed<QuizMode[]>(() => {
   if (category.value === 'MATH') {
@@ -106,6 +112,7 @@ watch(totalPages, (nextTotal) => {
 
 onMounted(async () => {
   document.addEventListener('click', closeModeSelectOnOutside)
+  await loadChildrenIfNeeded()
   await loadReport()
 })
 
@@ -117,6 +124,12 @@ async function loadReport() {
   loading.value = true
   error.value = ''
   try {
+    await loadChildrenIfNeeded()
+    if (isAdminReport.value && selectedChildId.value === null) {
+      report.value = null
+      error.value = 'Изберете детски профил.'
+      return
+    }
     const params = new URLSearchParams({
       from: fromDate.value,
       to: toDate.value
@@ -128,13 +141,24 @@ async function loadReport() {
     if (difficulty.value !== 'ALL') {
       params.set('difficulty', String(difficulty.value))
     }
-    report.value = await api.get<ChildReportResponse>(`/reports/me/attempts?${params}`)
+    const endpoint = isAdminReport.value
+      ? `/reports/children/${selectedChildId.value}/attempts?${params}`
+      : `/reports/me/attempts?${params}`
+    report.value = await api.get<ChildReportResponse>(endpoint)
     page.value = 1
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Справката не беше заредена.'
   } finally {
     loading.value = false
   }
+}
+
+async function loadChildrenIfNeeded() {
+  if (!isAdminReport.value || children.value.length > 0) {
+    return
+  }
+  children.value = await api.get<UserResponse[]>('/reports/children')
+  selectedChildId.value = children.value[0]?.id ?? null
 }
 
 function today() {
@@ -224,6 +248,9 @@ function resultLabel(attempt: ReportAttemptRow) {
 }
 
 function attemptHref(attempt: ReportAttemptRow) {
+  if (isAdminReport.value) {
+    return `/admin/monitoring/attempts/${attempt.attemptId}`
+  }
   return attempt.status === 'COMPLETED' ? `/result/${attempt.attemptId}` : `/quiz/${attempt.attemptId}`
 }
 
@@ -292,7 +319,13 @@ function nextPage() {
       <BarChart3 :size="25" />
     </div>
 
-    <div class="report-filters">
+    <div class="report-filters" :class="{ 'report-filters--admin': isAdminReport }">
+      <label v-if="isAdminReport" class="field child-field">
+        <span>Профил</span>
+        <select v-model.number="selectedChildId" @click="openNativePicker">
+          <option v-for="child in children" :key="child.id" :value="child.id">{{ child.displayName }}</option>
+        </select>
+      </label>
       <label class="field">
         <span>От дата</span>
         <input v-model="fromDate" type="date" @click="openNativePicker" />
@@ -452,9 +485,17 @@ function nextPage() {
 .report-filters {
   display: grid;
   grid-template-columns: repeat(2, minmax(140px, 0.7fr)) minmax(150px, 0.75fr) minmax(280px, 1.6fr) minmax(100px, 0.5fr) auto;
-  gap: 12px;
-  padding: 0 20px 6px;
+  gap: 14px 12px;
+  padding: 0 20px 10px;
   align-items: end;
+}
+
+.report-filters--admin {
+  grid-template-columns: minmax(150px, 0.8fr) repeat(2, minmax(140px, 0.7fr)) minmax(150px, 0.75fr) minmax(260px, 1.4fr) minmax(100px, 0.5fr) auto;
+}
+
+.child-field {
+  min-width: 0;
 }
 
 .mode-filter {
@@ -553,7 +594,7 @@ function nextPage() {
 }
 
 .report-error {
-  margin: 0 20px;
+  margin: 10px 20px 0;
 }
 
 .report-content {

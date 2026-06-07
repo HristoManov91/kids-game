@@ -10,11 +10,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AdminAccessTest {
-    private final AdminAccess adminAccess = new AdminAccess("христо");
+    private final AdminAccess adminAccess = new AdminAccess();
 
     @Test
-    void allowsConfiguredParentAdminIgnoringCaseAndWhitespace() {
-        var principal = principal(" Христо ", Role.PARENT);
+    void allowsAdminRole() {
+        var principal = principal("site-admin", Role.ADMIN);
         var authentication = new UsernamePasswordAuthenticationToken(
                 principal,
                 "password",
@@ -25,8 +25,8 @@ class AdminAccessTest {
     }
 
     @Test
-    void blocksConfiguredUsernameWhenRoleIsChild() {
-        var principal = principal("христо", Role.CHILD);
+    void blocksChildRole() {
+        var principal = principal("site-admin", Role.CHILD);
         var authentication = new UsernamePasswordAuthenticationToken(
                 principal,
                 "password",
@@ -37,9 +37,8 @@ class AdminAccessTest {
     }
 
     @Test
-    void recognizesReservedAdminUsernamesForRegistrationGuards() {
-        assertThat(adminAccess.isConfiguredAdminUsername(" Христо ")).isTrue();
-        assertThat(adminAccess.isConfiguredAdminUsername("hristo")).isFalse();
+    void blocksMissingAuthentication() {
+        assertThat(adminAccess.isAdmin(null)).isFalse();
     }
 
     private static UserPrincipal principal(String username, Role role) {

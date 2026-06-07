@@ -1,6 +1,5 @@
 package com.kidsgame.mathapp.auth;
 
-import com.kidsgame.mathapp.admin.AdminAccess;
 import com.kidsgame.mathapp.user.Role;
 import com.kidsgame.mathapp.user.UserEntity;
 import com.kidsgame.mathapp.user.UserRepository;
@@ -27,20 +26,17 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AdminAccess adminAccess;
 
     public AuthController(
             AuthenticationManager authenticationManager,
             JwtService jwtService,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            AdminAccess adminAccess
+            PasswordEncoder passwordEncoder
     ) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.adminAccess = adminAccess;
     }
 
     @PostMapping("/login")
@@ -66,16 +62,14 @@ public class AuthController {
         if (!request.password().equals(request.repeatPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Паролите не съвпадат.");
         }
-        if (adminAccess.isConfiguredAdminUsername(request.username())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Това потребителско име е запазено.");
-        }
-        if (userRepository.existsByUsernameIgnoreCase(request.username())) {
+        String username = request.username().trim();
+        if (userRepository.existsByUsernameIgnoreCase(username)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Акаунтът вече съществува.");
         }
 
         UserEntity user = new UserEntity(
-                request.username().trim(),
-                request.username().trim(),
+                username,
+                username,
                 passwordEncoder.encode(request.password()),
                 Role.CHILD
         );
@@ -90,17 +84,15 @@ public class AuthController {
 
     @PostMapping("/children")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('PARENT')")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse createChild(@Valid @RequestBody CreateChildRequest request) {
-        if (adminAccess.isConfiguredAdminUsername(request.username())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Това потребителско име е запазено.");
-        }
-        if (userRepository.existsByUsernameIgnoreCase(request.username())) {
+        String username = request.username().trim();
+        if (userRepository.existsByUsernameIgnoreCase(username)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Потребителското име вече съществува.");
         }
 
         UserEntity child = new UserEntity(
-                request.username().trim(),
+                username,
                 request.displayName().trim(),
                 passwordEncoder.encode(request.password()),
                 Role.CHILD

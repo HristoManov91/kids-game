@@ -14,9 +14,5 @@ where id in (
     where duplicate_rank > 1
 );
 
-update app_users
-set role = 'PARENT'
-where lower(trim(username)) = lower('христо');
-
 create unique index if not exists idx_app_users_username_normalized_unique
     on app_users (lower(trim(username)));

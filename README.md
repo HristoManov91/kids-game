@@ -95,7 +95,9 @@ DB_USERNAME=kids
 DB_PASSWORD=kids
 APP_JWT_SECRET=change-this-to-a-long-random-secret
 APP_TOKEN_TTL_HOURS=12
-APP_ADMIN_USERNAMES=христо
+APP_ADMIN_USERNAME=
+APP_ADMIN_PASSWORD=
+APP_ADMIN_DISPLAY_NAME=Администратор
 APP_CORS_ALLOWED_ORIGINS=http://localhost:5173
 APP_DEMO_SEED_ENABLED=false
 ```
@@ -110,6 +112,7 @@ VITE_SHOW_DEMO_LOGINS=false
 За публична среда най-важните неща са:
 
 - смени `APP_JWT_SECRET` със силна стойност
+- ако искаш backend-ът да създаде админ при старт, задай `APP_ADMIN_USERNAME` и силна `APP_ADMIN_PASSWORD` като secret-и, не в Git
 - не включвай `APP_DEMO_SEED_ENABLED`
 - сложи реалния frontend домейн в `APP_CORS_ALLOWED_ORIGINS`
 - използвай силна парола за PostgreSQL

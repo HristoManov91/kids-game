@@ -40,8 +40,6 @@ public class JwtService {
             Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("sub", principal.getUsername());
             payload.put("uid", principal.id());
-            payload.put("name", principal.displayName());
-            payload.put("role", principal.role().name());
             payload.put("exp", Instant.now().plusSeconds(tokenTtlHours * 3600).getEpochSecond());
 
             String headerPart = encodeJson(header);
@@ -91,4 +89,3 @@ public class JwtService {
                 .encodeToString(mac.doFinal(data.getBytes(StandardCharsets.UTF_8)));
     }
 }
-
