@@ -11,11 +11,26 @@ license: mit
 
 # Kids Game
 
-Детско приложение за упражнения по математика, български и логика. Идеята е проста: детето решава кратки тестове, печели кристали и с тях си прави собствени картинки в албум с награди.
+Kids Game е детско образователно приложение за упражнения по математика, български език и логика. Направих го с идеята ученето да не изглежда като сух тест, а като малка игра: детето решава задачи, събира кристали и после ги използва, за да отключва картинки и да подрежда собствени албуми.
 
-Проектът е писан като истинско full-stack приложение, не като еднократна демо страница. Има регистрация, вход, JWT auth, PostgreSQL база, Flyway миграции, справки, класации, admin екрани и тестове за важните части.
+Приложението може да се пробва тук:
 
-## Как Изглежда
+[https://manoraev-kids-game.hf.space/](https://manoraev-kids-game.hf.space/)
+
+## Идеята
+
+Исках да събера няколко неща в едно приложение:
+
+- кратки тестове, които не изморяват детето
+- ясна обратна връзка след всеки тест
+- награди, които мотивират без да пречат на ученето
+- албуми с картинки, които детето само подрежда
+- справки, с които родител или учител може да види напредъка
+- админ панел за преглед, корекции и поддръжка на съдържанието
+
+Проектът не е само frontend демо. Има реален backend, база данни, регистрация, вход, роли, защитени endpoints, миграции и тестове.
+
+## Екрани
 
 ### Вход
 
@@ -29,15 +44,19 @@ license: mit
 
 ![Албум с награди](docs/screenshots/rewards.png)
 
-## Какво Може
+## Какво Може Приложението
 
-- упражнения по математика, български и логика
-- различни типове задачи и 10 нива на трудност
-- резултат, оценка, време и кристали след тест
-- албум с награди: горска полянка, космос, морско дъно, ферма и джунгла
-- справки за последни опити и напредък
+- регистрация и вход с потребителски акаунт
+- тестове по математика, български език и логика
+- различни подкатегории и 10 нива на трудност
+- автоматично генериране на задачи
+- резултат, оценка, време и спечелени кристали след тест
+- албум с награди с различни теми: гора, космос, море, ферма и джунгла
+- покупка и подреждане на картинки в албум
+- лична справка за решени тестове
+- админ справки по детски профили
 - докладване на проблем в задача
-- admin екрани за преглед и корекции
+- админ екрани за каталог, награди и преглед на опити
 
 ## Технологии
 
@@ -46,34 +65,67 @@ Backend:
 - Java 25
 - Spring Boot 4
 - Spring Security
+- JWT authentication
 - Spring Data JPA
-- Flyway
+- Flyway migrations
 - PostgreSQL
+- Maven
 
 Frontend:
 
 - Vue 3
+- TypeScript
 - Vite
 - Pinia
 - Vue Router
-- TypeScript
+- Lucide icons
+- CSS без готов UI framework
+
+Инфраструктура:
+
+- Docker
+- Hugging Face Spaces за публичния app
+- PostgreSQL hosted база
+
+## Архитектура
+
+Приложението е разделено на две основни части:
+
+- `backend` е Spring Boot API, което пази потребители, тестове, резултати, кристали, албуми и админ операции.
+- `frontend` е Vue приложение, което се build-ва със Vite и говори с backend-а през `/api`.
+
+В production frontend-ът и backend-ът се сервират като един Docker app. Това улеснява deploy-а, защото няма нужда от два отделни публични URL-а и отделна CORS конфигурация между тях.
+
+## Сигурност
+
+Основните неща, които съм предвидил:
+
+- паролите се пазят hashed, не като plain text
+- authentication-ът е с JWT
+- admin достъпът е по роля `ADMIN`, не по hardcoded потребителско име
+- JWT token-ът не носи display name или role като излишни данни
+- protected endpoints са покрити със Spring Security правила
+- CORS се настройва през environment променлива
+- чувствителните production стойности са environment variables/secrets, не са в Git
 
 ## Локално Пускане
 
-Първо стартирай базата:
+Необходими са Java 25, Maven, Node.js/npm и Docker.
+
+Стартиране на PostgreSQL:
 
 ```bash
 docker compose up -d
 ```
 
-После backend-а:
+Backend:
 
 ```bash
 cd backend
 mvn spring-boot:run
 ```
 
-И frontend-а:
+Frontend:
 
 ```bash
 cd frontend
@@ -81,13 +133,15 @@ npm install
 npm run dev
 ```
 
-Отвори [http://localhost:5173](http://localhost:5173).
+Локалният адрес е:
 
-При чиста база няма готов потребител. Създай акаунт от екрана за регистрация и започни оттам.
+[http://localhost:5173](http://localhost:5173)
 
-## Настройки
+При чиста база няма готов потребител. Първият акаунт се създава от екрана за регистрация.
 
-Backend променливи:
+## Environment Променливи
+
+Backend:
 
 ```bash
 DB_URL=jdbc:postgresql://localhost:5432/kids_game
@@ -102,23 +156,16 @@ APP_CORS_ALLOWED_ORIGINS=http://localhost:5173
 APP_DEMO_SEED_ENABLED=false
 ```
 
-Frontend променливи:
+Frontend:
 
 ```bash
 VITE_API_BASE_URL=http://localhost:8080/api
 VITE_SHOW_DEMO_LOGINS=false
 ```
 
-За публична среда най-важните неща са:
+За production най-важното е `APP_JWT_SECRET` да бъде силна случайна стойност, а `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` и admin данните да се пазят като secrets.
 
-- смени `APP_JWT_SECRET` със силна стойност
-- ако искаш backend-ът да създаде админ при старт, задай `APP_ADMIN_USERNAME` и силна `APP_ADMIN_PASSWORD` като secret-и, не в Git
-- не включвай `APP_DEMO_SEED_ENABLED`
-- сложи реалния frontend домейн в `APP_CORS_ALLOWED_ORIGINS`
-- използвай силна парола за PostgreSQL
-- пази `.env` файловете извън Git
-
-## Проверки
+## Тестове И Проверки
 
 Backend тестове:
 
@@ -134,33 +181,46 @@ cd frontend
 npm run build
 ```
 
-В backend тестовете има проверки за JWT, CORS, protected/admin endpoints и бизнес правилата около албума с награди. Frontend build-ът минава през TypeScript проверка и production Vite build.
+В backend тестовете има проверки за JWT, CORS, protected/admin endpoints, генериране на задачи и бизнес логиката около наградите.
 
 ## Deploy
 
-Няма Render или Koyeb deploy конфигурация в repo-то, за да не те води към платен план или карта по невнимание.
+Публичната версия е качена като Docker Space в Hugging Face:
 
-[Hugging Face Spaces](https://huggingface.co/new-space) е по-подходящият безплатен вариант за приложението, защото Docker Spaces могат да стартират custom web app без кредитна карта. За базата използвай [Neon Free](https://neon.com/pricing), защото Free планът им е $0 и е описан като без кредитна карта.
+[https://manoraev-kids-game.hf.space/](https://manoraev-kids-game.hf.space/)
 
-Безплатният вариант, който има най-много смисъл за този проект:
+Repo-то съдържа нужната Hugging Face Space metadata в началото на този README:
 
-- Hugging Face Docker Space за приложението
-- Neon Free PostgreSQL за базата
+```yaml
+sdk: docker
+app_port: 7860
+```
 
-В Hugging Face Space настрой `sdk: docker`, порт `7860`, и добави тези Secrets:
+Production deploy-ът очаква външна PostgreSQL база и следните secrets/environment променливи:
 
-| Key | Value |
-| --- | --- |
-| `DB_URL` | connection string от Neon |
-| `APP_JWT_SECRET` | дълга случайна стойност |
-| `APP_DEMO_SEED_ENABLED` | `false` |
-| `APP_TOKEN_TTL_HOURS` | `12` |
+```bash
+DB_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
+APP_JWT_SECRET=long-random-production-secret
+APP_TOKEN_TTL_HOURS=12
+APP_DEMO_SEED_ENABLED=false
+APP_ADMIN_USERNAME=optional-admin-username
+APP_ADMIN_PASSWORD=optional-strong-admin-password
+APP_ADMIN_DISPLAY_NAME=Администратор
+```
 
-Backend-ът приема и `jdbc:postgresql://...`, и нормален hosted Postgres URL от типа `postgresql://...`.
+Backend-ът приема както `jdbc:postgresql://...`, така и hosted Postgres URL от типа `postgresql://...`.
 
-Приложението пак логически има две части:
+Demo seed-ът е изключен в production. Ако трябва да се създаде admin акаунт автоматично, това става само чрез secrets `APP_ADMIN_USERNAME` и `APP_ADMIN_PASSWORD`, а не чрез стойности в кода.
 
-- backend service: Spring Boot + PostgreSQL
-- frontend static site: Vite build, който говори с backend-а през `/api`
+## Структура
 
-За production настройките горе са задължителни, особено `APP_JWT_SECRET` и изключения demo seed. При single-service deploy frontend-ът използва относителен `/api`, така че няма нужда да гониш два различни публични URL-а.
+```text
+backend/      Spring Boot API, security, database models, services and tests
+frontend/     Vue 3 application, views, stores, components and assets
+docs/         screenshots and deployment notes
+Dockerfile    production image for the Hugging Face Space
+```
+
+## Защо Го Направих
+
+Това е проект, в който комбинирах реална full-stack архитектура с нещо практично и приятно за деца. Целта ми беше да има не само задачи, а завършен малък продукт: профили, тестове, награди, справки, админ инструменти и deployment, който може да се отвори от всеки браузър.
