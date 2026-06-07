@@ -359,7 +359,7 @@ async function submitSuggestion() {
         </div>
 
         <p class="plan-summary">
-          {{ testPlanSummary }} За завършен тест се печелят кристали, с които се купуват картинки и се подреждат албуми.
+          {{ testPlanSummary }} За завършен тест се печелят кристали, с които може да вземеш картинки и подреждаш албуми.
         </p>
 
         <div v-if="quiz.selectedCategory === 'MATH'" class="section-block">

@@ -13,6 +13,7 @@ import com.kidsgame.mathapp.quiz.QuizAttemptRepository;
 import com.kidsgame.mathapp.quiz.QuizGenerator;
 import com.kidsgame.mathapp.quiz.QuizMode;
 import com.kidsgame.mathapp.quiz.SuggestedBulgarianImageCatalog;
+import com.kidsgame.mathapp.user.Role;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -255,7 +256,7 @@ public class WordCatalogService {
     }
 
     private boolean isAdminTestAttempt(QuizAttempt attempt) {
-        return attempt.getUser().getUsername().toLowerCase(BG).equals("христо");
+        return attempt.getUser().getRole() == Role.ADMIN;
     }
 
     private List<GeneratedQuestion> readQuestions(QuizAttempt attempt) {

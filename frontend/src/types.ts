@@ -1,4 +1,4 @@
-export type Role = 'PARENT' | 'CHILD'
+export type Role = 'ADMIN' | 'CHILD'
 
 export type QuizCategory = 'MATH' | 'BULGARIAN' | 'LOGIC'
 

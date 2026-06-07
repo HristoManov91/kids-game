@@ -1,6 +1,7 @@
 package com.kidsgame.mathapp.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.kidsgame.mathapp.user.Role;
 import com.kidsgame.mathapp.user.UserEntity;
 import org.junit.jupiter.api.Test;
@@ -8,10 +9,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class JwtServiceTest {
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
+    };
+
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Test
@@ -21,6 +26,18 @@ class JwtServiceTest {
         String token = service.createToken(principal("mila"));
 
         assertThat(service.validateAndReadUsername(token)).contains("mila");
+    }
+
+    @Test
+    void keepsDisplayNameAndRoleOutOfTokenPayload() throws Exception {
+        JwtService service = new JwtService("test-secret-with-enough-entropy", 12, objectMapper);
+
+        String token = service.createToken(principal("site-admin", Role.ADMIN));
+        String[] parts = token.split("\\.");
+        Map<String, Object> payload = objectMapper.readValue(Base64.getUrlDecoder().decode(parts[1]), MAP_TYPE);
+
+        assertThat(payload).containsEntry("sub", "site-admin");
+        assertThat(payload).doesNotContainKeys("name", "role");
     }
 
     @Test
@@ -53,7 +70,11 @@ class JwtServiceTest {
     }
 
     private UserPrincipal principal(String username) {
-        UserEntity user = new UserEntity(username, "Мила", "hash", Role.CHILD);
+        return principal(username, Role.CHILD);
+    }
+
+    private UserPrincipal principal(String username, Role role) {
+        UserEntity user = new UserEntity(username, "Мила", "hash", role);
         ReflectionTestUtils.setField(user, "id", 42L);
         return new UserPrincipal(user);
     }

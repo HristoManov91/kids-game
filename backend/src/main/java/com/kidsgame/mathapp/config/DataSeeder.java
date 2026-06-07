@@ -36,8 +36,8 @@ import java.util.List;
 @Order(20)
 public class DataSeeder implements ApplicationRunner {
     private static final ZoneId SOFIA = ZoneId.of("Europe/Sofia");
-    private static final String ADMIN_USERNAME = "admin";
-    private static final String HRISTO_PASSWORD = "Hristo-Kids!2026";
+    private static final String DEMO_CHILD_USERNAME = "demo-child";
+    private static final String DEMO_CHILD_PASSWORD = "demo1234";
 
     private final UserRepository userRepository;
     private final QuizAttemptRepository attemptRepository;
@@ -68,29 +68,24 @@ public class DataSeeder implements ApplicationRunner {
             return;
         }
         createIfMissing("mila", "Мила", "mila123", Role.CHILD);
-        UserEntity hristo = ensureHristo();
-        removeExtraAdminAccount();
-        seedDemoAttempts(hristo);
-        normalizeHristoDemoAttempts(hristo);
+        UserEntity demoChild = ensureDemoChild();
+        seedDemoAttempts(demoChild);
+        normalizeDemoAttempts(demoChild);
     }
 
-    private UserEntity ensureHristo() {
-        return userRepository.findByUsernameIgnoreCase("христо")
+    private UserEntity ensureDemoChild() {
+        return userRepository.findByUsernameIgnoreCase(DEMO_CHILD_USERNAME)
                 .map(user -> {
-                    user.updateIdentity("Христо", "Христо");
-                    if (!passwordEncoder.matches(HRISTO_PASSWORD, user.getPasswordHash())) {
-                        user.updatePassword(passwordEncoder.encode(HRISTO_PASSWORD));
+                    user.updateIdentity(DEMO_CHILD_USERNAME, "Демо дете");
+                    user.updateRole(Role.CHILD);
+                    if (!passwordEncoder.matches(DEMO_CHILD_PASSWORD, user.getPasswordHash())) {
+                        user.updatePassword(passwordEncoder.encode(DEMO_CHILD_PASSWORD));
                     }
                     return userRepository.save(user);
                 })
                 .orElseGet(() -> userRepository.save(
-                        new UserEntity("Христо", "Христо", passwordEncoder.encode(HRISTO_PASSWORD), Role.CHILD)
+                        new UserEntity(DEMO_CHILD_USERNAME, "Демо дете", passwordEncoder.encode(DEMO_CHILD_PASSWORD), Role.CHILD)
                 ));
-    }
-
-    private void removeExtraAdminAccount() {
-        userRepository.findByUsernameIgnoreCase(ADMIN_USERNAME)
-                .ifPresent(userRepository::delete);
     }
 
     private void createIfMissing(String username, String displayName, String password, Role role) {
@@ -212,7 +207,7 @@ public class DataSeeder implements ApplicationRunner {
         return correctCount > 0 ? QuestionScoring.publicCorrectAnswer(question) : wrongAnswer(question);
     }
 
-    private void normalizeHristoDemoAttempts(UserEntity user) {
+    private void normalizeDemoAttempts(UserEntity user) {
         List<QuizAttempt> attempts = attemptRepository.findByUser_IdAndStatusOrderByStartedAtDesc(user.getId(), AttemptStatus.COMPLETED);
         LocalDate today = LocalDate.now(SOFIA);
         for (int index = 0; index < attempts.size(); index++) {
