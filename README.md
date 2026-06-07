@@ -96,18 +96,6 @@ Frontend:
 
 В production frontend-ът и backend-ът се сервират като един Docker app. Това улеснява deploy-а, защото няма нужда от два отделни публични URL-а и отделна CORS конфигурация между тях.
 
-## Сигурност
-
-Основните неща, които съм предвидил:
-
-- паролите се пазят hashed, не като plain text
-- authentication-ът е с JWT
-- admin достъпът е по роля `ADMIN`, не по hardcoded потребителско име
-- JWT token-ът не носи display name или role като излишни данни
-- protected endpoints са покрити със Spring Security правила
-- CORS се настройва през environment променлива
-- чувствителните production стойности са environment variables/secrets, не са в Git
-
 ## Локално Пускане
 
 Необходими са Java 25, Maven, Node.js/npm и Docker.
@@ -162,8 +150,6 @@ Frontend:
 VITE_API_BASE_URL=http://localhost:8080/api
 VITE_SHOW_DEMO_LOGINS=false
 ```
-
-За production най-важното е `APP_JWT_SECRET` да бъде силна случайна стойност, а `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` и admin данните да се пазят като secrets.
 
 ## Тестове И Проверки
 
@@ -220,7 +206,3 @@ frontend/     Vue 3 application, views, stores, components and assets
 docs/         screenshots and deployment notes
 Dockerfile    production image for the Hugging Face Space
 ```
-
-## Защо Го Направих
-
-Това е проект, в който комбинирах реална full-stack архитектура с нещо практично и приятно за деца. Целта ми беше да има не само задачи, а завършен малък продукт: профили, тестове, награди, справки, админ инструменти и deployment, който може да се отвори от всеки браузър.
