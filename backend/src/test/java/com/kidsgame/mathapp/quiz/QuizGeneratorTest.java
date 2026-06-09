@@ -287,6 +287,38 @@ class QuizGeneratorTest {
     }
 
     @Test
+    void sudokuUsesSmallGridBeforeStandardGridWithDifficultyBasedGivensAndQuestionCount() {
+        Map<Integer, String> expectedHeaders = Map.of(
+                1, "G|4|2|12",
+                4, "G|4|2|7",
+                5, "G|9|3|48",
+                10, "G|9|3|24"
+        );
+
+        expectedHeaders.forEach((difficulty, header) -> {
+            List<GeneratedQuestion> questions = generator.generate(QuizCategory.LOGIC, QuizMode.SUDOKU, difficulty);
+            GeneratedQuestion question = questions.getFirst();
+            String[] headerParts = header.split("\\|");
+            int size = Integer.parseInt(headerParts[1]);
+            int boxSize = Integer.parseInt(headerParts[2]);
+            int givenCount = Integer.parseInt(headerParts[3]);
+            int expectedQuestionCount = difficulty <= 4 ? 3 : 1;
+
+            assertThat(questions).hasSize(expectedQuestionCount);
+            assertThat(question.kind()).isEqualTo(QuestionKind.SUDOKU);
+            assertThat(question.sourceMode()).isEqualTo(QuizMode.SUDOKU);
+            assertThat(question.answerSlots().getFirst()).isEqualTo(header);
+            assertThat(question.answerSlots().stream().filter(slot -> slot.startsWith("C|"))).hasSize(givenCount);
+            assertThat(question.choices()).containsExactlyElementsOf(
+                    java.util.stream.IntStream.rangeClosed(1, size).mapToObj(String::valueOf).toList()
+            );
+            assertThat(question.answer()).hasSize(size * size);
+            assertValidSudokuAnswer(question.answer(), size, boxSize);
+            assertThat(QuestionScoring.publicCorrectAnswer(question).split(" / ")).hasSize(size);
+        });
+    }
+
+    @Test
     void bulgarianCatalogHasConsistentWordsLettersAndSyllables() {
         List<BulgarianWordCatalog.BulgarianWordEntry> words = BulgarianWordCatalog.words();
 
@@ -552,6 +584,41 @@ class QuizGeneratorTest {
         return question.answerSlots().stream()
                 .filter(slot -> slot.startsWith("O|"))
                 .count();
+    }
+
+    private void assertValidSudokuAnswer(String answer, int size, int boxSize) {
+        List<String> expected = java.util.stream.IntStream.rangeClosed(1, size)
+                .mapToObj(String::valueOf)
+                .sorted()
+                .toList();
+
+        for (int row = 0; row < size; row++) {
+            int currentRow = row;
+            assertThat(java.util.stream.IntStream.range(0, size)
+                    .mapToObj(col -> String.valueOf(answer.charAt(currentRow * size + col)))
+                    .sorted()
+                    .toList()).containsExactlyElementsOf(expected);
+        }
+
+        for (int col = 0; col < size; col++) {
+            int currentCol = col;
+            assertThat(java.util.stream.IntStream.range(0, size)
+                    .mapToObj(row -> String.valueOf(answer.charAt(row * size + currentCol)))
+                    .sorted()
+                    .toList()).containsExactlyElementsOf(expected);
+        }
+
+        for (int boxRow = 0; boxRow < size; boxRow += boxSize) {
+            for (int boxCol = 0; boxCol < size; boxCol += boxSize) {
+                List<String> values = new java.util.ArrayList<>();
+                for (int row = boxRow; row < boxRow + boxSize; row++) {
+                    for (int col = boxCol; col < boxCol + boxSize; col++) {
+                        values.add(String.valueOf(answer.charAt(row * size + col)));
+                    }
+                }
+                assertThat(values.stream().sorted().toList()).containsExactlyElementsOf(expected);
+            }
+        }
     }
 
 }

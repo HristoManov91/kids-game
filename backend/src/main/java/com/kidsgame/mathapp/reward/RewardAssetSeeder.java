@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -121,6 +122,14 @@ public class RewardAssetSeeder implements ApplicationRunner {
                 return java.util.Optional.of(Files.readAllBytes(file));
             } catch (IOException ex) {
                 LOGGER.warn("Could not read reward asset {}", file, ex);
+            }
+        }
+        ClassPathResource resource = new ClassPathResource("static" + staticPath);
+        if (resource.exists()) {
+            try {
+                return java.util.Optional.of(resource.getContentAsByteArray());
+            } catch (IOException ex) {
+                LOGGER.warn("Could not read reward asset {} from classpath.", staticPath, ex);
             }
         }
         LOGGER.warn("Reward asset {} was not found. Keeping the current image path as fallback.", staticPath);

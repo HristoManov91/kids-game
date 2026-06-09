@@ -59,6 +59,16 @@ public class AdminRewardCatalogService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<AdminRewardThemeResponse> themes() {
+        return catalog.adminThemes();
+    }
+
+    @Transactional
+    public AdminRewardThemeResponse updateThemeStatus(String themeId, boolean active) {
+        return catalog.updateThemeStatus(themeId, active);
+    }
+
     @Transactional
     public AdminRewardCatalogItemResponse create(
             String id,
@@ -147,10 +157,31 @@ public class AdminRewardCatalogService {
                 normalizedDefault,
                 normalizedMin,
                 normalizedMax,
-                true
+                item.isActive()
         );
         RewardCatalogItemEntity saved = itemRepository.save(item);
         syncPlacedItems(saved);
+        return toAdminResponse(saved, usageCounts().getOrDefault(saved.getId(), 0L));
+    }
+
+    @Transactional
+    public AdminRewardCatalogItemResponse updateItemStatus(String itemId, boolean active) {
+        RewardCatalogItemEntity item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Предметът не е намерен."));
+        item.update(
+                item.getThemeId(),
+                item.getThemeIds(),
+                item.getCategory(),
+                item.getName(),
+                item.getPrice(),
+                item.getStoredImage(),
+                item.getImageAssetId(),
+                item.getDefaultScale(),
+                item.getMinScale(),
+                item.getMaxScale(),
+                active
+        );
+        RewardCatalogItemEntity saved = itemRepository.save(item);
         return toAdminResponse(saved, usageCounts().getOrDefault(saved.getId(), 0L));
     }
 

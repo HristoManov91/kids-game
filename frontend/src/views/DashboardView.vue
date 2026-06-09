@@ -17,6 +17,7 @@ import {
   Lock,
   GalleryHorizontalEnd,
   Gem,
+  Grid3X3,
   MessageSquareText,
   Minus,
   PlayCircle,
@@ -89,7 +90,8 @@ const logicModeOptions = [
   { mode: 'FIND_OBJECT' as QuizMode, icon: Search, accent: 'green' },
   { mode: 'SPOT_DIFFERENCES' as QuizMode, icon: Eye, accent: 'blue' },
   { mode: 'MEMORY_PAIRS' as QuizMode, icon: GalleryHorizontalEnd, accent: 'violet' },
-  { mode: 'PATTERN_SEQUENCE' as QuizMode, icon: Boxes, accent: 'amber' }
+  { mode: 'PATTERN_SEQUENCE' as QuizMode, icon: Boxes, accent: 'amber' },
+  { mode: 'SUDOKU' as QuizMode, icon: Grid3X3, accent: 'green' }
 ]
 
 const suggestionCategoryOptions = [
@@ -122,21 +124,27 @@ const selectedRange = computed(() => {
   if (quiz.selectedCategory === 'LOGIC' && quiz.selectedMode === 'PATTERN_SEQUENCE') {
     return `${Math.min(13, Math.max(4, quiz.difficulty + 3))} фигури`
   }
+  if (quiz.selectedCategory === 'LOGIC' && quiz.selectedMode === 'SUDOKU') {
+    return quiz.difficulty <= 4
+      ? `${quiz.difficulty <= 2 ? 'повече' : 'по-малко'} подсказки · 4x4`
+      : `${quiz.difficulty <= 6 ? 'повече' : 'по-малко'} подсказки · 9x9`
+  }
   return levelRange(quiz.difficulty, quiz.selectedCategory)
 })
 const planOptions = computed(() => quiz.selectedCategory === 'LOGIC' ? ['SINGLE'] : ['SINGLE', 'CUSTOM', 'ALL'])
 const suggestionModeOptions = computed(() => taskOptionsForCategory(suggestionCategory.value))
 const canStart = computed(() => quiz.testPlan !== 'CUSTOM' || quiz.selectedIncludedModes.length >= 2)
 const selectedQuestionCount = computed(() => questionCountForCurrentSelection())
+const selectedQuestionNoun = computed(() => selectedQuestionCount.value === 1 ? 'задача' : 'задачи')
 const testPlanSummary = computed(() => {
   if (quiz.testPlan === 'CUSTOM') {
     const names = quiz.selectedIncludedModes.map((mode) => modeLabels[mode]).join(', ')
-    return `Тестът ще съдържа ${selectedQuestionCount.value} задачи от избраните категории: ${names || 'избери категории'}.`
+    return `Тестът ще съдържа ${selectedQuestionCount.value} ${selectedQuestionNoun.value} от избраните категории: ${names || 'избери категории'}.`
   }
   if (quiz.testPlan === 'ALL') {
-    return `Тестът ще съдържа ${selectedQuestionCount.value} задачи от всички типове в предмета.`
+    return `Тестът ще съдържа ${selectedQuestionCount.value} ${selectedQuestionNoun.value} от всички типове в предмета.`
   }
-  return `Тестът ще съдържа ${selectedQuestionCount.value} задачи: ${modeLabels[quiz.selectedMode]}.`
+  return `Тестът ще съдържа ${selectedQuestionCount.value} ${selectedQuestionNoun.value}: ${modeLabels[quiz.selectedMode]}.`
 })
 
 watch(
@@ -237,6 +245,9 @@ function questionCountForCurrentSelection() {
   if (quiz.testPlan === 'CUSTOM' || quiz.testPlan === 'ALL') {
     return 20
   }
+  if (quiz.selectedCategory === 'LOGIC' && quiz.selectedMode === 'SUDOKU') {
+    return quiz.difficulty <= 4 ? 3 : 1
+  }
   if (quiz.selectedCategory === 'MATH' && isGroupedMathMode(quiz.selectedMode)) {
     return 20
   }
@@ -255,7 +266,8 @@ function modeRule(mode: QuizMode) {
     FIND_OBJECT: 'Търсиш показания предмет в картинката и го натискаш.',
     SPOT_DIFFERENCES: 'Маркираш всички разлики между двете картинки.',
     MEMORY_PAIRS: 'Запомняш картите и отваряш еднаквите двойки.',
-    PATTERN_SEQUENCE: 'Запомняш модела и подреждаш фигурите в същия ред.'
+    PATTERN_SEQUENCE: 'Запомняш модела и подреждаш фигурите в същия ред.',
+    SUDOKU: 'Попълваш празните клетки така, че всяко число да се среща веднъж във всеки ред, колона и квадрат.'
   }
   return rules[mode] ?? ''
 }

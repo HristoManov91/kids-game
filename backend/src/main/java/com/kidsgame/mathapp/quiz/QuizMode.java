@@ -22,6 +22,7 @@ public enum QuizMode {
     SPOT_DIFFERENCES,
     MEMORY_PAIRS,
     PATTERN_SEQUENCE,
+    SUDOKU,
     CUSTOM_GROUP,
     ALL_GROUP
 }

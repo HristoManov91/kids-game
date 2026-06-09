@@ -53,7 +53,8 @@ public class QuizGenerator {
             QuizMode.FIND_OBJECT,
             QuizMode.SPOT_DIFFERENCES,
             QuizMode.MEMORY_PAIRS,
-            QuizMode.PATTERN_SEQUENCE
+            QuizMode.PATTERN_SEQUENCE,
+            QuizMode.SUDOKU
     );
     public static final List<QuizMode> PRIMITIVE_MODES = primitiveModes();
     private static final List<String> BULGARIAN_DISTRACTOR_LETTERS = List.of(
@@ -177,7 +178,7 @@ public class QuizGenerator {
             case UNKNOWN_ADDITION -> unknownAddition(id, max, random);
             case UNKNOWN_SUBTRACTION -> unknownSubtraction(id, max, random);
             case COMPARE -> compare(id, max, random);
-            case MIXED, UNKNOWN_MIXED, MULTIPLICATION_DIVISION, CUSTOM_GROUP, ALL_GROUP, WORD_LETTERS, WORD_SYLLABLES, WORD_TYPING, WORD_PICTURE, WORD_MISSING_LETTER, WORD_FIRST_LETTER_GROUP, WORD_WRONG_LETTER, FIND_OBJECT, SPOT_DIFFERENCES, MEMORY_PAIRS, PATTERN_SEQUENCE -> throw new IllegalStateException("Grouped modes must be resolved before question generation.");
+            case MIXED, UNKNOWN_MIXED, MULTIPLICATION_DIVISION, CUSTOM_GROUP, ALL_GROUP, WORD_LETTERS, WORD_SYLLABLES, WORD_TYPING, WORD_PICTURE, WORD_MISSING_LETTER, WORD_FIRST_LETTER_GROUP, WORD_WRONG_LETTER, FIND_OBJECT, SPOT_DIFFERENCES, MEMORY_PAIRS, PATTERN_SEQUENCE, SUDOKU -> throw new IllegalStateException("Grouped modes must be resolved before question generation.");
         };
     }
 
@@ -773,8 +774,9 @@ public class QuizGenerator {
         if (availableModes.isEmpty()) {
             throw new IllegalArgumentException("At least one logic question category is required.");
         }
+        int questionCount = logicQuestionCount(availableModes, difficulty);
         List<GeneratedQuestion> questions = new ArrayList<>();
-        while (questions.size() < LOGIC_QUESTIONS_PER_TEST) {
+        while (questions.size() < questionCount) {
             QuizMode mode = pickMode(availableModes, random);
             if (mode == QuizMode.SPOT_DIFFERENCES) {
                 questions.add(spotDifferencesQuestion(questions.size() + 1, difficulty, random));
@@ -784,9 +786,252 @@ public class QuizGenerator {
                 questions.add(memoryPairsQuestion(questions.size() + 1, difficulty, random));
             } else if (mode == QuizMode.PATTERN_SEQUENCE) {
                 questions.add(patternSequenceQuestion(questions.size() + 1, difficulty, random));
+            } else if (mode == QuizMode.SUDOKU) {
+                questions.add(sudokuQuestion(questions.size() + 1, difficulty, random));
             }
         }
         return questions;
+    }
+
+    private int logicQuestionCount(List<QuizMode> availableModes, int difficulty) {
+        if (availableModes.size() == 1 && availableModes.getFirst() == QuizMode.SUDOKU) {
+            return sudokuQuestionCount(difficulty);
+        }
+        return LOGIC_QUESTIONS_PER_TEST;
+    }
+
+    private int sudokuQuestionCount(int difficulty) {
+        return Math.max(1, Math.min(10, difficulty)) <= 4 ? 3 : 1;
+    }
+
+    private GeneratedQuestion sudokuQuestion(int id, int difficulty, ThreadLocalRandom random) {
+        SudokuLevel level = sudokuLevel(difficulty);
+        int[][] solution = null;
+        int[][] puzzle = null;
+        int closestGivenCount = Integer.MAX_VALUE;
+        for (int attempt = 0; attempt < 30; attempt++) {
+            int[][] candidateSolution = shuffledSudokuSolution(level.size(), level.boxSize(), random);
+            int[][] candidatePuzzle = sudokuPuzzle(candidateSolution, level.boxSize(), level.givenCount(), random);
+            int candidateGivenCount = sudokuGivenCount(candidatePuzzle);
+            if (candidateGivenCount == level.givenCount()) {
+                solution = candidateSolution;
+                puzzle = candidatePuzzle;
+                break;
+            }
+            if (Math.abs(candidateGivenCount - level.givenCount()) < Math.abs(closestGivenCount - level.givenCount())) {
+                solution = candidateSolution;
+                puzzle = candidatePuzzle;
+                closestGivenCount = candidateGivenCount;
+            }
+        }
+        if (solution == null || puzzle == null) {
+            solution = shuffledSudokuSolution(level.size(), level.boxSize(), random);
+            puzzle = sudokuPuzzle(solution, level.boxSize(), level.givenCount(), random);
+        }
+        int actualGivenCount = sudokuGivenCount(puzzle);
+        List<String> slots = new ArrayList<>();
+        slots.add("G|" + level.size() + "|" + level.boxSize() + "|" + actualGivenCount);
+        for (int row = 0; row < level.size(); row++) {
+            for (int col = 0; col < level.size(); col++) {
+                if (puzzle[row][col] > 0) {
+                    slots.add("C|" + row + "|" + col + "|" + puzzle[row][col] + "|1");
+                }
+            }
+        }
+        return new GeneratedQuestion(
+                id,
+                QuestionKind.SUDOKU,
+                level.size() == 4 ? "Попълни судоку 4x4" : "Попълни судоку 9x9",
+                null,
+                level.size() == 4
+                        ? "Във всеки ред, колона и квадрат 2 на 2 трябва да има числата от 1 до 4."
+                        : "Във всеки ред, колона и квадрат 3 на 3 трябва да има числата от 1 до 9.",
+                slots,
+                sudokuChoices(level.size()),
+                sudokuAnswer(solution),
+                QuizMode.SUDOKU
+        );
+    }
+
+    private int sudokuGivenCount(int[][] puzzle) {
+        int givens = 0;
+        for (int[] row : puzzle) {
+            for (int value : row) {
+                if (value > 0) {
+                    givens++;
+                }
+            }
+        }
+        return givens;
+    }
+
+    private SudokuLevel sudokuLevel(int difficulty) {
+        return switch (Math.max(1, Math.min(10, difficulty))) {
+            case 1 -> new SudokuLevel(4, 2, 12);
+            case 2 -> new SudokuLevel(4, 2, 10);
+            case 3 -> new SudokuLevel(4, 2, 8);
+            case 4 -> new SudokuLevel(4, 2, 7);
+            case 5 -> new SudokuLevel(9, 3, 48);
+            case 6 -> new SudokuLevel(9, 3, 42);
+            case 7 -> new SudokuLevel(9, 3, 36);
+            case 8 -> new SudokuLevel(9, 3, 32);
+            case 9 -> new SudokuLevel(9, 3, 28);
+            default -> new SudokuLevel(9, 3, 24);
+        };
+    }
+
+    private List<String> sudokuChoices(int size) {
+        List<String> choices = new ArrayList<>();
+        for (int number = 1; number <= size; number++) {
+            choices.add(String.valueOf(number));
+        }
+        return choices;
+    }
+
+    private int[][] shuffledSudokuSolution(int size, int boxSize, ThreadLocalRandom random) {
+        int[] rows = shuffledSudokuIndexes(size, boxSize, random);
+        int[] cols = shuffledSudokuIndexes(size, boxSize, random);
+        int[] numbers = shuffledNumbers(size, random);
+        int[][] grid = new int[size][size];
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                int baseValue = (rows[row] * boxSize + rows[row] / boxSize + cols[col]) % size;
+                grid[row][col] = numbers[baseValue];
+            }
+        }
+        return grid;
+    }
+
+    private int[] shuffledSudokuIndexes(int size, int boxSize, ThreadLocalRandom random) {
+        List<Integer> bands = new ArrayList<>();
+        for (int band = 0; band < boxSize; band++) {
+            bands.add(band);
+        }
+        Collections.shuffle(bands, random);
+        List<Integer> indexes = new ArrayList<>();
+        for (int band : bands) {
+            List<Integer> insideBand = new ArrayList<>();
+            for (int offset = 0; offset < boxSize; offset++) {
+                insideBand.add(band * boxSize + offset);
+            }
+            Collections.shuffle(insideBand, random);
+            indexes.addAll(insideBand);
+        }
+        return indexes.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private int[] shuffledNumbers(int size, ThreadLocalRandom random) {
+        List<Integer> numbers = new ArrayList<>();
+        for (int number = 1; number <= size; number++) {
+            numbers.add(number);
+        }
+        Collections.shuffle(numbers, random);
+        return numbers.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private int[][] sudokuPuzzle(int[][] solution, int boxSize, int givenCount, ThreadLocalRandom random) {
+        int size = solution.length;
+        int[][] puzzle = copyGrid(solution);
+        List<Integer> cells = new ArrayList<>();
+        for (int index = 0; index < size * size; index++) {
+            cells.add(index);
+        }
+        Collections.shuffle(cells, random);
+        int remainingGivens = size * size;
+        for (int cell : cells) {
+            if (remainingGivens <= givenCount) {
+                break;
+            }
+            int row = cell / size;
+            int col = cell % size;
+            int previous = puzzle[row][col];
+            puzzle[row][col] = 0;
+            if (countSudokuSolutions(copyGrid(puzzle), boxSize, 2) == 1) {
+                remainingGivens--;
+            } else {
+                puzzle[row][col] = previous;
+            }
+        }
+        return puzzle;
+    }
+
+    private int[][] copyGrid(int[][] grid) {
+        int[][] copy = new int[grid.length][grid.length];
+        for (int row = 0; row < grid.length; row++) {
+            System.arraycopy(grid[row], 0, copy[row], 0, grid[row].length);
+        }
+        return copy;
+    }
+
+    private int countSudokuSolutions(int[][] grid, int boxSize, int limit) {
+        SudokuCell cell = bestEmptySudokuCell(grid, boxSize);
+        if (cell == null) {
+            return 1;
+        }
+        int solutions = 0;
+        for (int value = 1; value <= grid.length; value++) {
+            if (!canPlaceSudokuValue(grid, boxSize, cell.row(), cell.col(), value)) {
+                continue;
+            }
+            grid[cell.row()][cell.col()] = value;
+            solutions += countSudokuSolutions(grid, boxSize, limit - solutions);
+            grid[cell.row()][cell.col()] = 0;
+            if (solutions >= limit) {
+                return solutions;
+            }
+        }
+        return solutions;
+    }
+
+    private SudokuCell bestEmptySudokuCell(int[][] grid, int boxSize) {
+        SudokuCell best = null;
+        int bestOptions = Integer.MAX_VALUE;
+        for (int row = 0; row < grid.length; row++) {
+            for (int col = 0; col < grid.length; col++) {
+                if (grid[row][col] != 0) {
+                    continue;
+                }
+                int options = 0;
+                for (int value = 1; value <= grid.length; value++) {
+                    if (canPlaceSudokuValue(grid, boxSize, row, col, value)) {
+                        options++;
+                    }
+                }
+                if (options < bestOptions) {
+                    bestOptions = options;
+                    best = new SudokuCell(row, col);
+                }
+            }
+        }
+        return best;
+    }
+
+    private boolean canPlaceSudokuValue(int[][] grid, int boxSize, int row, int col, int value) {
+        for (int index = 0; index < grid.length; index++) {
+            if (grid[row][index] == value || grid[index][col] == value) {
+                return false;
+            }
+        }
+        int boxRow = (row / boxSize) * boxSize;
+        int boxCol = (col / boxSize) * boxSize;
+        for (int boxRowOffset = 0; boxRowOffset < boxSize; boxRowOffset++) {
+            for (int boxColOffset = 0; boxColOffset < boxSize; boxColOffset++) {
+                if (grid[boxRow + boxRowOffset][boxCol + boxColOffset] == value) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private String sudokuAnswer(int[][] solution) {
+        StringBuilder answer = new StringBuilder(solution.length * solution.length);
+        for (int[] row : solution) {
+            for (int value : row) {
+                answer.append(value);
+            }
+        }
+        return answer.toString();
     }
 
     private GeneratedQuestion patternSequenceQuestion(int id, int difficulty, ThreadLocalRandom random) {
@@ -1746,6 +1991,12 @@ public class QuizGenerator {
     }
 
     private record PatternToken(String id, String shape, String color, String label) {
+    }
+
+    private record SudokuLevel(int size, int boxSize, int givenCount) {
+    }
+
+    private record SudokuCell(int row, int col) {
     }
 
     private static List<QuizMode> primitiveModes() {

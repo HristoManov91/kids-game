@@ -40,6 +40,8 @@ const activePatternSlots = ref<Record<number, number>>({})
 const patternPreviewing = ref<Record<number, boolean>>({})
 const patternPreviewRemaining = ref<Record<number, number>>({})
 const patternPreviewSeen = ref<Record<number, boolean>>({})
+const sudokuAnswers = ref<Record<number, string[]>>({})
+const activeSudokuCells = ref<Record<number, number>>({})
 const selectedGroupingWord = ref('')
 const now = ref(Date.now())
 const activeBaseSeconds = ref(0)
@@ -135,6 +137,23 @@ interface PatternGame {
   choices: PatternToken[]
 }
 
+interface SudokuCell {
+  key: string
+  row: number
+  col: number
+  index: number
+  value: string
+  given: boolean
+}
+
+interface SudokuGame {
+  size: number
+  boxSize: number
+  givenCount: number
+  cells: SudokuCell[]
+  choices: string[]
+}
+
 const BULGARIAN_REPLACEMENT_DISTRACTORS = [
   'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К', 'Л', 'М',
   'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Я'
@@ -143,6 +162,7 @@ const BULGARIAN_REPLACEMENT_DISTRACTORS = [
 const attemptId = computed(() => String(route.params.attemptId))
 const attempt = computed(() => quiz.currentAttempt)
 const questions = computed(() => attempt.value?.questions ?? [])
+const hasMultipleQuestions = computed(() => (questions.value.length || attempt.value?.totalQuestions || 0) > 1)
 const currentQuestion = computed(() => questions.value[index.value] ?? null)
 const currentAnswer = computed(() => {
   const question = currentQuestion.value
@@ -168,6 +188,7 @@ const isFindObjectQuestion = computed(() => isFindObjectKind(currentQuestion.val
 const isSpotDifferencesQuestion = computed(() => isSpotDifferencesKind(currentQuestion.value))
 const isMemoryPairsQuestion = computed(() => isMemoryPairsKind(currentQuestion.value))
 const isPatternSequenceQuestion = computed(() => isPatternSequenceKind(currentQuestion.value))
+const isSudokuQuestion = computed(() => isSudokuKind(currentQuestion.value))
 const isPictureChoiceQuestion = computed(() => currentQuestion.value?.sourceMode === 'WORD_PICTURE')
 const isWrongLetterQuestionCurrent = computed(() => isWrongLetterQuestion(currentQuestion.value))
 const groupingItems = computed(() => (currentQuestion.value ? groupingQuestionItems(currentQuestion.value) : []))
@@ -182,9 +203,21 @@ const findObjectScene = computed(() => currentQuestion.value ? parseFindObjectSc
 const findObjectTarget = computed(() => findObjectTargetItem(currentQuestion.value))
 const memoryGame = computed(() => currentQuestion.value ? parseMemoryGame(currentQuestion.value) : emptyMemoryGame())
 const patternGame = computed(() => currentQuestion.value ? parsePatternGame(currentQuestion.value) : emptyPatternGame())
+const sudokuGame = computed(() => currentQuestion.value ? parseSudokuGame(currentQuestion.value) : emptySudokuGame())
 const patternSlots = computed(() => {
   const question = currentQuestion.value
   return question ? patternAnswers.value[question.id] ?? emptyPatternSlots(question) : []
+})
+const sudokuCells = computed(() => {
+  const question = currentQuestion.value
+  if (!question) {
+    return sudokuGame.value.cells
+  }
+  const values = sudokuAnswers.value[question.id] ?? emptySudokuValues(question)
+  return sudokuGame.value.cells.map((cell) => ({
+    ...cell,
+    value: cell.given ? cell.value : values[cell.index] ?? ''
+  }))
 })
 const memoryFlipped = computed(() => {
   const question = currentQuestion.value
@@ -308,6 +341,9 @@ const difficultyCaption = computed(() => {
   if (attempt.value?.category === 'LOGIC' && isPatternSequenceQuestion.value) {
     return `${patternGame.value.length} фигури`
   }
+  if (attempt.value?.category === 'LOGIC' && isSudokuQuestion.value) {
+    return `${sudokuGame.value.size}x${sudokuGame.value.size} · ${sudokuGame.value.givenCount} подсказки`
+  }
   return attempt.value ? levelRange(attempt.value.difficulty, attempt.value.category) : ''
 })
 const elapsedSeconds = computed(() => {
@@ -350,6 +386,10 @@ watch(
       ensurePatternState(question)
       seedPatternFromAnswer(question, currentAnswer.value?.answer ?? draftAnswers.value[question.id] ?? '')
       typedAnswer.value = currentAnswer.value?.answer ?? patternAnswerText(question)
+    } else if (isSudokuKind(question)) {
+      ensureSudokuState(question)
+      seedSudokuFromAnswer(question, currentAnswer.value?.answer ?? draftAnswers.value[question.id] ?? '')
+      typedAnswer.value = currentAnswer.value?.answer ?? sudokuAnswerText(question)
     } else {
       typedAnswer.value = currentAnswer.value?.answer ?? draftAnswers.value[question.id] ?? ''
     }
@@ -550,6 +590,9 @@ function isDraftAnswerComplete(question: QuestionResponse, answer: string | unde
   if (isPatternSequenceKind(question)) {
     return isPatternComplete(question)
   }
+  if (isSudokuKind(question)) {
+    return isSudokuComplete(question)
+  }
   if (isSpotDifferencesKind(question)) {
     return parseSpotDifferenceAnswer(answer).length >= parseSpotDifferenceScene(question).differenceIds.length
   }
@@ -573,6 +616,9 @@ function isQuestionAnswered(question: QuestionResponse) {
   }
   if (isMemoryPairsKind(question)) {
     return isMemorySolved(question)
+  }
+  if (isSudokuKind(question)) {
+    return isSudokuComplete(question)
   }
   return isDraftAnswerComplete(question, draftAnswers.value[question.id])
 }
@@ -606,6 +652,216 @@ function isMemoryPairsKind(question: QuestionResponse | null | undefined) {
 
 function isPatternSequenceKind(question: QuestionResponse | null | undefined) {
   return question?.kind === 'PATTERN_SEQUENCE'
+}
+
+function isSudokuKind(question: QuestionResponse | null | undefined) {
+  return question?.kind === 'SUDOKU'
+}
+
+function emptySudokuGame(): SudokuGame {
+  return {
+    size: 4,
+    boxSize: 2,
+    givenCount: 0,
+    cells: [],
+    choices: []
+  }
+}
+
+function parseSudokuGame(question: QuestionResponse): SudokuGame {
+  const game = emptySudokuGame()
+  const givens = new Map<number, string>()
+  question.answerSlots.forEach((slot) => {
+    const parts = slot.split('|')
+    if (parts[0] === 'G') {
+      game.size = Number(parts[1]) || 4
+      game.boxSize = Number(parts[2]) || 2
+      game.givenCount = Number(parts[3]) || 0
+      return
+    }
+    if (parts[0] !== 'C') {
+      return
+    }
+    const row = Number(parts[1])
+    const col = Number(parts[2])
+    const value = parts[3] ?? ''
+    if (Number.isInteger(row) && Number.isInteger(col) && value) {
+      givens.set(row * game.size + col, value)
+    }
+  })
+  game.choices = question.choices.length
+    ? question.choices
+    : Array.from({ length: game.size }, (_, choiceIndex) => String(choiceIndex + 1))
+  game.cells = Array.from({ length: game.size * game.size }, (_, cellIndex) => {
+    const row = Math.floor(cellIndex / game.size)
+    const col = cellIndex % game.size
+    const value = givens.get(cellIndex) ?? ''
+    return {
+      key: `${question.id}-sudoku-${row}-${col}`,
+      row,
+      col,
+      index: cellIndex,
+      value,
+      given: Boolean(value)
+    }
+  })
+  return game
+}
+
+function emptySudokuValues(question: QuestionResponse) {
+  return parseSudokuGame(question).cells.map((cell) => cell.value)
+}
+
+function ensureSudokuState(question: QuestionResponse) {
+  if (!sudokuAnswers.value[question.id]) {
+    sudokuAnswers.value = {
+      ...sudokuAnswers.value,
+      [question.id]: emptySudokuValues(question)
+    }
+  }
+  const currentActive = activeSudokuCells.value[question.id]
+  const game = parseSudokuGame(question)
+  if (!Number.isInteger(currentActive) || currentActive < 0 || currentActive >= game.size * game.size || game.cells[currentActive]?.given) {
+    const firstEditable = game.cells.find((cell) => !cell.given)?.index ?? 0
+    activeSudokuCells.value = {
+      ...activeSudokuCells.value,
+      [question.id]: firstEditable
+    }
+  }
+}
+
+function seedSudokuFromAnswer(question: QuestionResponse, answer: string) {
+  ensureSudokuState(question)
+  const normalized = (answer ?? '').replace(/[^0-9]/g, '')
+  if (!normalized) {
+    return
+  }
+  const game = parseSudokuGame(question)
+  const values = emptySudokuValues(question)
+  Array.from(normalized).slice(0, values.length).forEach((value, cellIndex) => {
+    if (!game.cells[cellIndex]?.given) {
+      values[cellIndex] = value
+    }
+  })
+  sudokuAnswers.value = {
+    ...sudokuAnswers.value,
+    [question.id]: values
+  }
+}
+
+function sudokuAnswerText(question: QuestionResponse) {
+  return (sudokuAnswers.value[question.id] ?? emptySudokuValues(question)).join('')
+}
+
+function updateSudokuAnswer(question: QuestionResponse, values: string[]) {
+  sudokuAnswers.value = {
+    ...sudokuAnswers.value,
+    [question.id]: values
+  }
+  const answer = values.join('')
+  typedAnswer.value = answer
+  draftAnswers.value = {
+    ...draftAnswers.value,
+    [question.id]: answer
+  }
+}
+
+function selectSudokuCell(cell: SudokuCell) {
+  if (!currentQuestion.value || currentAnswer.value || cell.given) {
+    return
+  }
+  activeSudokuCells.value = {
+    ...activeSudokuCells.value,
+    [currentQuestion.value.id]: cell.index
+  }
+}
+
+function setSudokuValue(value: string) {
+  const question = currentQuestion.value
+  if (!question || currentAnswer.value) {
+    return
+  }
+  ensureSudokuState(question)
+  const activeIndex = activeSudokuCells.value[question.id]
+  const game = parseSudokuGame(question)
+  const cell = game.cells[activeIndex]
+  if (!cell || cell.given) {
+    return
+  }
+  const values = [...(sudokuAnswers.value[question.id] ?? emptySudokuValues(question))]
+  values[activeIndex] = value
+  updateSudokuAnswer(question, values)
+  const nextCell = game.cells.find((candidate) => !candidate.given && !values[candidate.index] && candidate.index > activeIndex)
+    ?? game.cells.find((candidate) => !candidate.given && !values[candidate.index])
+  if (nextCell) {
+    activeSudokuCells.value = {
+      ...activeSudokuCells.value,
+      [question.id]: nextCell.index
+    }
+  }
+}
+
+function clearSudokuCell() {
+  const question = currentQuestion.value
+  if (!question || currentAnswer.value) {
+    return
+  }
+  const activeIndex = activeSudokuCells.value[question.id]
+  const game = parseSudokuGame(question)
+  if (game.cells[activeIndex]?.given) {
+    return
+  }
+  const values = [...(sudokuAnswers.value[question.id] ?? emptySudokuValues(question))]
+  values[activeIndex] = ''
+  updateSudokuAnswer(question, values)
+}
+
+function isSudokuComplete(question: QuestionResponse) {
+  const values = sudokuAnswers.value[question.id] ?? emptySudokuValues(question)
+  return values.length === parseSudokuGame(question).size ** 2 && values.every((value) => Boolean(value))
+}
+
+function sudokuCellClass(cell: SudokuCell) {
+  const question = currentQuestion.value
+  const active = Boolean(question && activeSudokuCells.value[question.id] === cell.index && !currentAnswer.value)
+  const correctValue = sudokuCorrectValue(cell.index)
+  return {
+    given: cell.given,
+    active,
+    filled: Boolean(cell.value),
+    correct: Boolean(currentAnswer && cell.value && correctValue && cell.value === correctValue),
+    wrong: Boolean(currentAnswer && cell.value && correctValue && cell.value !== correctValue)
+  }
+}
+
+function sudokuCellStyle(cell: SudokuCell) {
+  const size = sudokuGame.value.size
+  const box = sudokuGame.value.boxSize
+  return {
+    borderTopWidth: cell.row % box === 0 ? '3px' : '1px',
+    borderLeftWidth: cell.col % box === 0 ? '3px' : '1px',
+    borderRightWidth: cell.col === size - 1 ? '3px' : '1px',
+    borderBottomWidth: cell.row === size - 1 ? '3px' : '1px'
+  }
+}
+
+function sudokuCorrectRows() {
+  const answer = currentAnswer.value?.correctAnswer ?? ''
+  return answer
+    .split('/')
+    .map((row) => row.trim().replace(/[^0-9]/g, ''))
+    .filter(Boolean)
+}
+
+function sudokuCorrectValue(cellIndex: number) {
+  const rows = sudokuCorrectRows()
+  if (!rows.length) {
+    return ''
+  }
+  const size = rows[0]?.length ?? sudokuGame.value.size
+  const row = Math.floor(cellIndex / size)
+  const col = cellIndex % size
+  return rows[row]?.[col] ?? ''
 }
 
 function emptyMemoryGame(): MemoryGame {
@@ -1388,6 +1644,9 @@ function wrongFeedbackIntro(question: QuestionResponse | null) {
   if (isPatternSequenceKind(question)) {
     return 'Почти! Правилният модел е'
   }
+  if (isSudokuKind(question)) {
+    return 'Почти! Правилното судоку е'
+  }
   if (isWordKind(question)) {
     return 'Почти! Виж как се подрежда думата:'
   }
@@ -1409,6 +1668,9 @@ function feedbackAnswerText(question: QuestionResponse | null, answer: string) {
   }
   if (isPatternSequenceKind(question)) {
     return patternCorrectText(question)
+  }
+  if (isSudokuKind(question)) {
+    return answer
   }
   if (!isGroupingKind(question)) {
     return answer
@@ -1866,7 +2128,7 @@ async function submitIssueReport() {
           <strong>{{ progressLabel }}</strong>
         </div>
 
-        <div class="question-jump-list" aria-label="Навигация по задачи">
+        <div v-if="hasMultipleQuestions" class="question-jump-list" aria-label="Навигация по задачи">
           <button
             v-for="(question, questionIndex) in questions"
             :key="question.id"
@@ -1880,7 +2142,7 @@ async function submitIssueReport() {
         </div>
 
         <div class="question-body">
-          <p class="question-number">Задача {{ index + 1 }}</p>
+          <p v-if="hasMultipleQuestions" class="question-number">Задача {{ index + 1 }}</p>
           <template v-if="isFindObjectQuestion">
             <h1 class="find-object-title">
               <span>Намери</span>
@@ -2089,6 +2351,51 @@ async function submitIssueReport() {
                     aria-hidden="true"
                   ></span>
                 </button>
+              </div>
+            </section>
+          </template>
+
+          <template v-else-if="isSudokuQuestion">
+            <h1 class="sudoku-title">{{ currentQuestion.prompt }}</h1>
+            <p class="sudoku-counter">
+              <template v-if="currentAnswer">
+                {{ currentAnswer.correct ? 'Судокуто е решено правилно.' : 'Виж правилната подредба.' }}
+              </template>
+              <template v-else>
+                Попълни празните клетки с числата от 1 до {{ sudokuGame.size }}.
+              </template>
+            </p>
+            <section
+              class="sudoku-game"
+              :class="{ compact: sudokuGame.size === 4, answered: currentAnswer }"
+              :style="{ '--sudoku-size': sudokuGame.size }"
+              aria-label="Судоку дъска"
+            >
+              <div class="sudoku-grid">
+                <button
+                  v-for="cell in sudokuCells"
+                  :key="cell.key"
+                  type="button"
+                  class="sudoku-cell"
+                  :class="sudokuCellClass(cell)"
+                  :style="sudokuCellStyle(cell)"
+                  :disabled="Boolean(currentAnswer) || cell.given"
+                  :aria-label="`Ред ${cell.row + 1}, колона ${cell.col + 1}`"
+                  @click="selectSudokuCell(cell)"
+                >
+                  {{ currentAnswer && !cell.given ? (sudokuCorrectValue(cell.index) || cell.value) : cell.value }}
+                </button>
+              </div>
+              <div v-if="!currentAnswer" class="sudoku-pad" aria-label="Числа за судоку">
+                <button
+                  v-for="choice in sudokuGame.choices"
+                  :key="choice"
+                  type="button"
+                  @click="setSudokuValue(choice)"
+                >
+                  {{ choice }}
+                </button>
+                <button type="button" class="sudoku-clear" @click="clearSudokuCell">Изчисти</button>
               </div>
             </section>
           </template>
@@ -2447,11 +2754,11 @@ async function submitIssueReport() {
 
 .question-jump-list button {
   display: grid;
-  min-width: 34px;
+  width: 34px;
   height: 34px;
   place-items: center;
   border: 1px solid rgba(36, 48, 74, 0.14);
-  border-radius: 50%;
+  border-radius: 8px;
   color: var(--muted);
   background: #ffffff;
   font-weight: 900;
@@ -2972,6 +3279,110 @@ h1 {
 .pattern-choice:hover {
   border-color: var(--blue);
   transform: translateY(-2px);
+}
+
+.sudoku-title {
+  font-size: clamp(2.1rem, 6vw, 3.6rem);
+}
+
+.sudoku-counter {
+  margin: -8px 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.sudoku-game {
+  display: grid;
+  width: min(720px, 100%);
+  gap: 16px;
+  justify-items: center;
+}
+
+.sudoku-grid {
+  display: grid;
+  inline-size: min(100%, 560px);
+  max-inline-size: 100%;
+  aspect-ratio: 1;
+  grid-template-columns: repeat(var(--sudoku-size), minmax(0, 1fr));
+  overflow: hidden;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 16px 34px rgba(36, 48, 74, 0.12);
+}
+
+.sudoku-game.compact .sudoku-grid {
+  inline-size: min(100%, 420px);
+}
+
+.sudoku-cell {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  border-color: rgba(36, 48, 74, 0.5);
+  border-style: solid;
+  color: var(--ink);
+  background: #ffffff;
+  font-size: clamp(1rem, 3.8vw, 2.1rem);
+  font-weight: 950;
+  line-height: 1;
+  transition: background 150ms ease, box-shadow 150ms ease, color 150ms ease;
+}
+
+.sudoku-game.compact .sudoku-cell {
+  font-size: clamp(1.8rem, 8vw, 3.2rem);
+}
+
+.sudoku-cell.given {
+  background: rgba(63, 125, 217, 0.09);
+  color: var(--blue);
+}
+
+.sudoku-cell.active {
+  background: rgba(245, 185, 66, 0.2);
+  box-shadow: inset 0 0 0 4px rgba(245, 185, 66, 0.38);
+}
+
+.sudoku-cell.correct {
+  color: var(--green-dark);
+  background: rgba(30, 157, 116, 0.1);
+}
+
+.sudoku-cell.wrong {
+  color: var(--danger);
+  background: rgba(238, 92, 92, 0.1);
+}
+
+.sudoku-pad {
+  display: flex;
+  max-width: min(100%, 560px);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.sudoku-pad button {
+  display: grid;
+  min-width: 48px;
+  min-height: 48px;
+  place-items: center;
+  border: 2px solid rgba(36, 48, 74, 0.13);
+  border-radius: 8px;
+  color: var(--ink);
+  background: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 950;
+}
+
+.sudoku-pad button:hover {
+  border-color: var(--blue);
+}
+
+.sudoku-pad .sudoku-clear {
+  min-width: 96px;
+  color: var(--muted);
+  font-size: 0.98rem;
 }
 
 .pattern-token {

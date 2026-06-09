@@ -22,6 +22,7 @@ export const modeLabels: Record<QuizMode, string> = {
   SPOT_DIFFERENCES: 'Открий разликите',
   MEMORY_PAIRS: 'Запомни двойките',
   PATTERN_SEQUENCE: 'Подреди модела',
+  SUDOKU: 'Судоку',
   CUSTOM_GROUP: 'Тест по избор',
   ALL_GROUP: 'Всички'
 }
@@ -48,6 +49,7 @@ export const modeShortLabels: Record<QuizMode, string> = {
   SPOT_DIFFERENCES: 'Картинки',
   MEMORY_PAIRS: 'Памет',
   PATTERN_SEQUENCE: 'Модел',
+  SUDOKU: 'Судоку',
   CUSTOM_GROUP: 'Избор',
   ALL_GROUP: 'Всички'
 }
@@ -113,7 +115,8 @@ export const primitiveModes: QuizMode[] = [
   'FIND_OBJECT',
   'SPOT_DIFFERENCES',
   'MEMORY_PAIRS',
-  'PATTERN_SEQUENCE'
+  'PATTERN_SEQUENCE',
+  'SUDOKU'
 ]
 
 export const mathPrimitiveModes: QuizMode[] = [
@@ -140,5 +143,6 @@ export const logicPrimitiveModes: QuizMode[] = [
   'FIND_OBJECT',
   'SPOT_DIFFERENCES',
   'MEMORY_PAIRS',
-  'PATTERN_SEQUENCE'
+  'PATTERN_SEQUENCE',
+  'SUDOKU'
 ]

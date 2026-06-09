@@ -9,5 +9,6 @@ public enum QuestionKind {
     GROUPING,
     SPOT_DIFFERENCES,
     MEMORY_PAIRS,
-    PATTERN_SEQUENCE
+    PATTERN_SEQUENCE,
+    SUDOKU
 }
