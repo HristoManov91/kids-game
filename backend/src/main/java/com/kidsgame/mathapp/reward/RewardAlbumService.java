@@ -60,6 +60,7 @@ public class RewardAlbumService {
     public List<AlbumPictureSummaryResponse> pictures(UserPrincipal principal) {
         return pictureRepository.findByUser_IdOrderByUpdatedAtDesc(principal.id())
                 .stream()
+                .filter(picture -> catalog.isThemeActive(picture.getThemeId()))
                 .map(this::toSummary)
                 .toList();
     }
@@ -68,7 +69,7 @@ public class RewardAlbumService {
     public AlbumPictureDetailResponse create(CreatePictureRequest request, UserPrincipal principal) {
         UserEntity user = userRepository.findById(principal.id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Потребителят не е намерен."));
-        RewardThemeResponse theme = catalog.theme(request.themeId());
+        RewardThemeResponse theme = catalog.activeTheme(request.themeId());
         String name = normalizedName(request.name(), theme);
         RewardAlbumPicture picture = new RewardAlbumPicture(user, name, theme.id(), writePlacedItems(List.of()));
         return toDetail(pictureRepository.save(picture));
@@ -149,8 +150,12 @@ public class RewardAlbumService {
     }
 
     private RewardAlbumPicture loadOwnedPicture(UUID pictureId, UserPrincipal principal) {
-        return pictureRepository.findByIdAndUser_Id(pictureId, principal.id())
+        RewardAlbumPicture picture = pictureRepository.findByIdAndUser_Id(pictureId, principal.id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Картината не е намерена."));
+        if (!catalog.isThemeActive(picture.getThemeId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Картината не е намерена.");
+        }
+        return picture;
     }
 
     private AlbumPictureSummaryResponse toSummary(RewardAlbumPicture picture) {

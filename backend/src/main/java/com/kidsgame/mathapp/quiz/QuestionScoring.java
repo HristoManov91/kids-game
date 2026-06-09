@@ -34,7 +34,28 @@ public final class QuestionScoring {
                     .filter(part -> !part.isBlank())
                     .collect(Collectors.joining(" → "));
         }
+        if (question.kind() == QuestionKind.SUDOKU) {
+            int size = sudokuSizeFromQuestion(question);
+            String answer = question.answer() == null ? "" : question.answer();
+            if (size <= 0 || answer.length() < size * size) {
+                return answer;
+            }
+            return java.util.stream.IntStream.range(0, size)
+                    .mapToObj(row -> answer.substring(row * size, row * size + size))
+                    .collect(Collectors.joining(" / "));
+        }
         return question.answer();
+    }
+
+    private static int sudokuSizeFromQuestion(GeneratedQuestion question) {
+        return question.answerSlots().stream()
+                .filter(slot -> slot != null && slot.startsWith("G|"))
+                .findFirst()
+                .map(slot -> {
+                    String[] parts = slot.split("\\|", -1);
+                    return parts.length >= 2 ? parseInt(parts[1], 0) : 0;
+                })
+                .orElse(0);
     }
 
     private static Set<String> listAnswer(String answer) {

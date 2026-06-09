@@ -24,10 +24,11 @@ export type QuizMode =
   | 'SPOT_DIFFERENCES'
   | 'MEMORY_PAIRS'
   | 'PATTERN_SEQUENCE'
+  | 'SUDOKU'
   | 'CUSTOM_GROUP'
   | 'ALL_GROUP'
 
-export type QuestionKind = 'NUMERIC' | 'CHOICE' | 'LETTER_ORDER' | 'SYLLABLE_ORDER' | 'WORD_TYPING' | 'GROUPING' | 'SPOT_DIFFERENCES' | 'MEMORY_PAIRS' | 'PATTERN_SEQUENCE'
+export type QuestionKind = 'NUMERIC' | 'CHOICE' | 'LETTER_ORDER' | 'SYLLABLE_ORDER' | 'WORD_TYPING' | 'GROUPING' | 'SPOT_DIFFERENCES' | 'MEMORY_PAIRS' | 'PATTERN_SEQUENCE' | 'SUDOKU'
 export type AttemptStatus = 'ACTIVE' | 'COMPLETED'
 export type Medal = 'DIAMOND_CUP' | 'GOLD_CUP' | 'SILVER_MEDAL' | 'BRONZE_STAR' | 'KEEP_GOING'
 export type IssueReportStatus = 'OPEN' | 'RESOLVED' | 'DISMISSED'
@@ -159,6 +160,12 @@ export interface RewardTheme {
   thumbnailImage: string
   categories: string[]
   defaultPictureName: string
+}
+
+export interface AdminRewardTheme extends RewardTheme {
+  active: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 export interface RewardCatalogItem {

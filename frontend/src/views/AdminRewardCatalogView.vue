@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { Eraser, Gem, Pencil, Save, Search, Trash2 } from 'lucide-vue-next'
 import { api } from '@/services/api'
-import type { AdminRewardCatalogItem, DeleteRewardCatalogItemResponse, RewardCatalogResponse, RewardTheme } from '@/types'
+import type { AdminRewardCatalogItem, AdminRewardTheme, DeleteRewardCatalogItemResponse } from '@/types'
 
 interface RewardItemForm {
   themeIds: string[]
@@ -16,9 +16,11 @@ interface RewardItemForm {
 }
 
 const items = ref<AdminRewardCatalogItem[]>([])
-const themes = ref<RewardTheme[]>([])
+const themes = ref<AdminRewardTheme[]>([])
 const loading = ref(false)
 const saving = ref(false)
+const themeSaving = ref<Record<string, boolean>>({})
+const itemSaving = ref<Record<string, boolean>>({})
 const error = ref('')
 const success = ref('')
 const search = ref('')
@@ -111,19 +113,57 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const [catalog, adminItems] = await Promise.all([
-      api.get<RewardCatalogResponse>('/rewards/catalog'),
+    const [adminThemes, adminItems] = await Promise.all([
+      api.get<AdminRewardTheme[]>('/admin/reward-catalog/themes'),
       api.get<AdminRewardCatalogItem[]>('/admin/reward-catalog')
     ])
-    themes.value = catalog.themes
+    themes.value = adminThemes
     items.value = adminItems
-    if (form.themeIds.length === 0 && catalog.themes.length > 0) {
-      form.themeIds = [catalog.themes[0].id]
+    if (form.themeIds.length === 0 && adminThemes.length > 0) {
+      form.themeIds = [adminThemes[0].id]
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Каталогът не се зареди.'
   } finally {
     loading.value = false
+  }
+}
+
+async function toggleTheme(theme: AdminRewardTheme) {
+  themeSaving.value = { ...themeSaving.value, [theme.id]: true }
+  error.value = ''
+  success.value = ''
+  try {
+    const updated = await api.put<AdminRewardTheme>(`/admin/reward-catalog/themes/${theme.id}`, {
+      active: !theme.active
+    })
+    themes.value = themes.value.map((item) => item.id === updated.id ? updated : item)
+    success.value = updated.active
+      ? `${updated.name} е активен за потребителите.`
+      : `${updated.name} е скрит от потребителите.`
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Светът не беше обновен.'
+  } finally {
+    themeSaving.value = { ...themeSaving.value, [theme.id]: false }
+  }
+}
+
+async function toggleItem(item: AdminRewardCatalogItem) {
+  itemSaving.value = { ...itemSaving.value, [item.id]: true }
+  error.value = ''
+  success.value = ''
+  try {
+    const updated = await api.put<AdminRewardCatalogItem>(`/admin/reward-catalog/${item.id}/status`, {
+      active: !item.active
+    })
+    items.value = items.value.map((entry) => entry.id === updated.id ? updated : entry)
+    success.value = updated.active
+      ? `${updated.name} е активен за потребителите.`
+      : `${updated.name} е скрит от потребителите.`
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Предметът не беше обновен.'
+  } finally {
+    itemSaving.value = { ...itemSaving.value, [item.id]: false }
   }
 }
 
@@ -258,6 +298,10 @@ function itemThemeNames(item: AdminRewardCatalogItem) {
   return itemThemeIds(item).map(themeName).join(', ')
 }
 
+function themeItemCount(themeId: string) {
+  return items.value.filter((item) => itemThemeIds(item).includes(themeId)).length
+}
+
 function isImageAsset(image: string) {
   return image.startsWith('/') || image.startsWith('http') || image.startsWith('data:image') || image.startsWith('blob:')
 }
@@ -323,6 +367,38 @@ function clearSelectedFilePreview() {
     <section class="panel hero-panel">
       <div>
         <h1>Наградни предмети</h1>
+      </div>
+    </section>
+
+    <section class="panel theme-admin-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Светове в албума</h2>
+        <span v-if="loading">Зарежда...</span>
+      </div>
+      <div class="theme-status-list">
+        <article
+          v-for="theme in themes"
+          :key="theme.id"
+          class="theme-status-row"
+          :class="{ inactive: !theme.active }"
+        >
+          <div class="status-row-copy">
+            <strong>{{ theme.name }}</strong>
+            <span>{{ themeItemCount(theme.id) }} предмета · {{ theme.active ? 'видим за потребители' : 'скрит от потребители' }}</span>
+          </div>
+          <button
+            class="status-toggle"
+            :class="{ active: theme.active }"
+            type="button"
+            role="switch"
+            :aria-checked="theme.active"
+            :disabled="Boolean(themeSaving[theme.id])"
+            @click="toggleTheme(theme)"
+          >
+            <span class="toggle-track" aria-hidden="true"><span></span></span>
+            <span>{{ theme.active ? 'Деактивирай' : 'Активирай' }}</span>
+          </button>
+        </article>
       </div>
     </section>
 
@@ -410,7 +486,7 @@ function clearSelectedFilePreview() {
         </div>
 
         <div class="reward-items-grid">
-          <article v-for="item in paginatedItems" :key="item.id" class="reward-admin-card">
+          <article v-for="item in paginatedItems" :key="item.id" class="reward-admin-card" :class="{ inactive: !item.active }">
             <div class="admin-item-art">
               <img v-if="isImageAsset(item.image)" :src="item.image" :alt="item.name" draggable="false">
               <span v-else>{{ item.image }}</span>
@@ -424,6 +500,18 @@ function clearSelectedFilePreview() {
               </span>
             </div>
             <div class="admin-card-actions">
+              <button
+                class="status-toggle item-status-toggle"
+                :class="{ active: item.active }"
+                type="button"
+                role="switch"
+                :aria-checked="item.active"
+                :disabled="Boolean(itemSaving[item.id])"
+                @click="toggleItem(item)"
+              >
+                <span class="toggle-track" aria-hidden="true"><span></span></span>
+                <span>{{ item.active ? 'Деактивирай' : 'Активирай' }}</span>
+              </button>
               <button class="icon-button tooltip-button" type="button" title="Редактирай" aria-label="Редактирай" data-tooltip="Редактирай" @click="edit(item)">
                 <Pencil :size="18" />
                 <span class="sr-only">Редактирай</span>
@@ -477,6 +565,116 @@ function clearSelectedFilePreview() {
   color: var(--ink);
   font-size: clamp(2.2rem, 5vw, 4.2rem);
   line-height: 0.98;
+}
+
+.theme-admin-panel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.theme-status-list {
+  display: grid;
+  gap: 8px;
+}
+
+.theme-status-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(36, 48, 74, 0.12);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #ffffff;
+  box-shadow: 0 6px 14px rgba(36, 48, 74, 0.05);
+}
+
+.theme-status-row.inactive,
+.reward-admin-card.inactive {
+  background: rgba(244, 246, 250, 0.78);
+}
+
+.status-row-copy {
+  min-width: 0;
+}
+
+.status-row-copy strong,
+.status-row-copy span {
+  display: block;
+}
+
+.status-row-copy strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-row-copy span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.status-toggle {
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  min-width: 154px;
+  min-height: 42px;
+  border: 1px solid rgba(36, 48, 74, 0.16);
+  border-radius: 999px;
+  padding: 0 12px 0 6px;
+  color: var(--muted);
+  background: #ffffff;
+  font: inherit;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.status-toggle:disabled {
+  cursor: progress;
+  opacity: 0.68;
+}
+
+.status-toggle.active {
+  border-color: rgba(31, 158, 118, 0.32);
+  color: var(--green-dark);
+  background: #eefaf3;
+}
+
+.toggle-track {
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(107, 119, 145, 0.28);
+  transition: background 160ms ease;
+}
+
+.toggle-track span {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(36, 48, 74, 0.2);
+  transition: transform 160ms ease;
+}
+
+.status-toggle.active .toggle-track {
+  background: var(--green);
+}
+
+.status-toggle.active .toggle-track span {
+  transform: translateX(20px);
 }
 
 .admin-reward-layout {
@@ -756,6 +954,29 @@ function clearSelectedFilePreview() {
   gap: 6px;
 }
 
+.item-status-toggle {
+  width: fit-content;
+  min-width: 136px;
+  min-height: 38px;
+  margin-right: auto;
+  padding: 0 12px 0 8px;
+  white-space: nowrap;
+}
+
+.item-status-toggle .toggle-track {
+  width: 42px;
+  height: 24px;
+}
+
+.item-status-toggle .toggle-track span {
+  width: 16px;
+  height: 16px;
+}
+
+.item-status-toggle.active .toggle-track span {
+  transform: translateX(18px);
+}
+
 .price-chip {
   border-radius: 999px;
   padding: 4px 8px;
@@ -766,6 +987,11 @@ function clearSelectedFilePreview() {
 
 .admin-card-actions {
   grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
   justify-content: flex-end;
 }
 
@@ -872,6 +1098,18 @@ function clearSelectedFilePreview() {
 
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .theme-status-row {
+    grid-template-columns: 1fr;
+  }
+
+  .status-toggle {
+    width: 100%;
+  }
+
+  .admin-card-actions .item-status-toggle {
+    width: fit-content;
   }
 
   .preview-box {

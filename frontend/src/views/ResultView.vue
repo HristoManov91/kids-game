@@ -119,6 +119,10 @@ function isPatternSequenceQuestion(question: QuestionResponse | undefined) {
   return question?.kind === 'PATTERN_SEQUENCE'
 }
 
+function isSudokuQuestion(question: QuestionResponse | undefined) {
+  return question?.kind === 'SUDOKU'
+}
+
 function findObjectLabel(question: QuestionResponse | undefined, id: string) {
   const item = question?.answerSlots
     .map((slot) => slot.split('|'))
@@ -258,7 +262,27 @@ function answerSummaryLabel(question: QuestionResponse | undefined, answer: Ques
   if (isPatternSequenceQuestion(question)) {
     return answer.correct ? 'моделът е подреден' : 'виж правилния модел'
   }
+  if (isSudokuQuestion(question)) {
+    return answer.correct ? 'судокуто е решено' : 'виж правилното судоку'
+  }
   return answer.answer
+}
+
+function sudokuRows(answer: QuestionResultResponse) {
+  const source = answer.correct ? answer.answer : answer.correctAnswer
+  const rows = source
+    .split('/')
+    .map((row) => row.trim().replace(/[^0-9]/g, ''))
+    .filter(Boolean)
+  if (rows.length) {
+    return rows
+  }
+  const normalized = source.replace(/[^0-9]/g, '')
+  const size = normalized.length === 16 ? 4 : normalized.length === 81 ? 9 : 0
+  if (!size) {
+    return []
+  }
+  return Array.from({ length: size }, (_, row) => normalized.slice(row * size, row * size + size))
 }
 
 function wordSummaryToken(question: QuestionResponse | undefined, answer: QuestionResultResponse) {
@@ -398,6 +422,12 @@ function formatGrade(value: string | number | null) {
                 <b v-else class="summary-token" :class="{ correct: answer.correct, wrong: !answer.correct }">
                   {{ patternSequenceFallback(questionById.get(answer.questionId)) }}
                 </b>
+              </div>
+              <div v-else-if="isSudokuQuestion(questionById.get(answer.questionId))" class="summary-sudoku">
+                <span class="summary-prompt">{{ questionById.get(answer.questionId)?.prompt }}</span>
+                <div class="summary-sudoku-grid" :class="{ correct: answer.correct, wrong: !answer.correct }">
+                  <span v-for="(row, rowIndex) in sudokuRows(answer)" :key="`${answer.questionId}-${rowIndex}`">{{ row }}</span>
+                </div>
               </div>
               <span v-else class="summary-prompt">
                 <template v-for="(part, partIndex) in promptParts(questionById.get(answer.questionId)?.prompt)" :key="partIndex">
@@ -720,6 +750,35 @@ function formatGrade(value: string | number | null) {
 .summary-pattern-token.diamond {
   border-radius: 5px;
   transform: rotate(45deg) scale(0.86);
+}
+
+.summary-sudoku {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.summary-sudoku-grid {
+  display: grid;
+  width: fit-content;
+  gap: 2px;
+  border-radius: 8px;
+  padding: 7px;
+  background: rgba(36, 48, 74, 0.05);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.92rem;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.summary-sudoku-grid.correct {
+  color: var(--green-dark);
+  background: rgba(30, 157, 116, 0.08);
+}
+
+.summary-sudoku-grid.wrong {
+  color: var(--danger);
+  background: rgba(217, 75, 75, 0.08);
 }
 
 .summary-grouping {

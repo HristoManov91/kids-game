@@ -179,6 +179,7 @@ public class ReportService {
             case SPOT_DIFFERENCES -> List.of(QuizMode.SPOT_DIFFERENCES);
             case MEMORY_PAIRS -> List.of(QuizMode.MEMORY_PAIRS);
             case PATTERN_SEQUENCE -> List.of(QuizMode.PATTERN_SEQUENCE);
+            case SUDOKU -> List.of(QuizMode.SUDOKU);
             case ALL_GROUP, CUSTOM_GROUP -> QuizGenerator.PRIMITIVE_MODES;
         };
     }
@@ -379,7 +380,7 @@ public class ReportService {
             case UNKNOWN_MIXED -> List.of(QuizMode.UNKNOWN_ADDITION, QuizMode.UNKNOWN_SUBTRACTION);
             case MULTIPLICATION_DIVISION -> List.of(QuizMode.MULTIPLICATION, QuizMode.DIVISION);
             case WORD_LETTERS, WORD_SYLLABLES, WORD_TYPING, WORD_PICTURE, WORD_MISSING_LETTER, WORD_FIRST_LETTER_GROUP, WORD_WRONG_LETTER -> List.of(attempt.getMode());
-            case FIND_OBJECT, SPOT_DIFFERENCES, MEMORY_PAIRS, PATTERN_SEQUENCE -> List.of(attempt.getMode());
+            case FIND_OBJECT, SPOT_DIFFERENCES, MEMORY_PAIRS, PATTERN_SEQUENCE, SUDOKU -> List.of(attempt.getMode());
             case ALL_GROUP -> attempt.getCategory() == QuizCategory.BULGARIAN
                     ? QuizGenerator.BULGARIAN_PRIMITIVE_MODES
                     : attempt.getCategory() == QuizCategory.LOGIC

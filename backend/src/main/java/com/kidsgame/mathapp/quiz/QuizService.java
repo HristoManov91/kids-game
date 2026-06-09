@@ -415,6 +415,9 @@ public class QuizService {
         if (question.kind() == QuestionKind.MEMORY_PAIRS) {
             return normalized.toUpperCase(BG).startsWith("SOLVED") ? "SOLVED" : normalized.toUpperCase(BG);
         }
+        if (question.kind() == QuestionKind.SUDOKU) {
+            return normalized.replaceAll("[^0-9]", "");
+        }
         if (question.kind() == QuestionKind.CHOICE) {
             return normalized;
         }
@@ -545,7 +548,7 @@ public class QuizService {
             case UNKNOWN_MIXED -> List.of(QuizMode.UNKNOWN_ADDITION, QuizMode.UNKNOWN_SUBTRACTION);
             case MULTIPLICATION_DIVISION -> List.of(QuizMode.MULTIPLICATION, QuizMode.DIVISION);
             case WORD_LETTERS, WORD_SYLLABLES, WORD_TYPING, WORD_PICTURE, WORD_MISSING_LETTER, WORD_FIRST_LETTER_GROUP, WORD_WRONG_LETTER -> List.of(mode);
-            case FIND_OBJECT, SPOT_DIFFERENCES, MEMORY_PAIRS, PATTERN_SEQUENCE -> List.of(mode);
+            case FIND_OBJECT, SPOT_DIFFERENCES, MEMORY_PAIRS, PATTERN_SEQUENCE, SUDOKU -> List.of(mode);
             case ALL_GROUP -> primitiveModesFor(category);
             case CUSTOM_GROUP -> {
                 List<QuizMode> allowedModes = primitiveModesFor(category);

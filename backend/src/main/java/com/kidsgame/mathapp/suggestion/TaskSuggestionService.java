@@ -42,7 +42,8 @@ public class TaskSuggestionService {
             QuizMode.FIND_OBJECT,
             QuizMode.SPOT_DIFFERENCES,
             QuizMode.MEMORY_PAIRS,
-            QuizMode.PATTERN_SEQUENCE
+            QuizMode.PATTERN_SEQUENCE,
+            QuizMode.SUDOKU
     );
 
     private final TaskSuggestionRepository suggestionRepository;

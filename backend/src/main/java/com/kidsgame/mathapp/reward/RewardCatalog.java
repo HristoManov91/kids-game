@@ -3,28 +3,38 @@ package com.kidsgame.mathapp.reward;
 import jakarta.annotation.PostConstruct;
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class RewardCatalog {
     private final Map<String, RewardThemeResponse> themes;
     private final Map<String, RewardCatalogItemResponse> items;
     private final RewardCatalogItemRepository itemRepository;
+    private final RewardAlbumThemeSettingRepository themeSettingRepository;
 
     public RewardCatalog() {
-        this(null);
+        this(null, null);
     }
 
     @Autowired
-    public RewardCatalog(RewardCatalogItemRepository itemRepository) {
+    public RewardCatalog(
+            @Nullable
+            RewardCatalogItemRepository itemRepository,
+            @Nullable
+            RewardAlbumThemeSettingRepository themeSettingRepository
+    ) {
         this.themes = new LinkedHashMap<>();
         this.items = new LinkedHashMap<>();
         this.itemRepository = itemRepository;
+        this.themeSettingRepository = themeSettingRepository;
         seedThemes();
         seedItems();
     }
@@ -39,10 +49,26 @@ public class RewardCatalog {
                 itemRepository.save(new RewardCatalogItemEntity(item));
             }
         }
+        if (themeSettingRepository == null) {
+            return;
+        }
+        for (String themeId : themes.keySet()) {
+            if (!themeSettingRepository.existsById(themeId)) {
+                themeSettingRepository.save(new RewardAlbumThemeSetting(themeId, defaultThemeActive(themeId)));
+            }
+        }
     }
 
     public RewardCatalogResponse catalog() {
-        return new RewardCatalogResponse(List.copyOf(themes.values()), activeItems());
+        Set<String> activeThemeIds = activeThemeIds();
+        return new RewardCatalogResponse(
+                themes.values().stream()
+                        .filter(theme -> activeThemeIds.contains(theme.id()))
+                        .toList(),
+                activeItems().stream()
+                        .filter(item -> item.themeIds().stream().anyMatch(activeThemeIds::contains))
+                        .toList()
+        );
     }
 
     public RewardThemeResponse theme(String themeId) {
@@ -51,6 +77,42 @@ public class RewardCatalog {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Избери свят за картината.");
         }
         return theme;
+    }
+
+    public RewardThemeResponse activeTheme(String themeId) {
+        RewardThemeResponse theme = theme(themeId);
+        if (!isThemeActive(theme.id())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Този свят не е активен.");
+        }
+        return theme;
+    }
+
+    public boolean isThemeActive(String themeId) {
+        if (!themes.containsKey(themeId)) {
+            return false;
+        }
+        if (themeSettingRepository == null) {
+            return true;
+        }
+        return themeSettingRepository.findById(themeId)
+                .map(RewardAlbumThemeSetting::isActive)
+                .orElse(defaultThemeActive(themeId));
+    }
+
+    public List<AdminRewardThemeResponse> adminThemes() {
+        return themes.values().stream()
+                .map(theme -> toAdminThemeResponse(theme, themeSetting(theme.id())))
+                .toList();
+    }
+
+    public AdminRewardThemeResponse updateThemeStatus(String themeId, boolean active) {
+        RewardThemeResponse theme = theme(themeId);
+        RewardAlbumThemeSetting setting = themeSetting(theme.id());
+        setting.setActive(active);
+        if (themeSettingRepository != null) {
+            setting = themeSettingRepository.save(setting);
+        }
+        return toAdminThemeResponse(theme, setting);
     }
 
     public RewardCatalogItemResponse item(String itemId) {
@@ -68,6 +130,9 @@ public class RewardCatalog {
     }
 
     public List<RewardCatalogItemResponse> itemsForTheme(String themeId) {
+        if (!isThemeActive(themeId)) {
+            return List.of();
+        }
         return activeItems().stream()
                 .filter(item -> item.belongsToTheme(themeId))
                 .toList();
@@ -81,6 +146,44 @@ public class RewardCatalog {
                 .stream()
                 .map(RewardCatalogItemEntity::toResponse)
                 .toList();
+    }
+
+    private Set<String> activeThemeIds() {
+        if (themeSettingRepository == null) {
+            return Set.copyOf(themes.keySet());
+        }
+        return new HashSet<>(themeSettingRepository.findByActiveTrueOrderByThemeIdAsc()
+                .stream()
+                .map(RewardAlbumThemeSetting::getThemeId)
+                .filter(themes::containsKey)
+                .toList());
+    }
+
+    private RewardAlbumThemeSetting themeSetting(String themeId) {
+        if (themeSettingRepository == null) {
+            return new RewardAlbumThemeSetting(themeId, defaultThemeActive(themeId));
+        }
+        return themeSettingRepository.findById(themeId)
+                .orElseGet(() -> themeSettingRepository.save(new RewardAlbumThemeSetting(themeId, defaultThemeActive(themeId))));
+    }
+
+    private AdminRewardThemeResponse toAdminThemeResponse(RewardThemeResponse theme, RewardAlbumThemeSetting setting) {
+        return new AdminRewardThemeResponse(
+                theme.id(),
+                theme.name(),
+                theme.description(),
+                theme.backgroundImage(),
+                theme.thumbnailImage(),
+                theme.categories(),
+                theme.defaultPictureName(),
+                setting.isActive(),
+                setting.getCreatedAt(),
+                setting.getUpdatedAt()
+        );
+    }
+
+    private boolean defaultThemeActive(String themeId) {
+        return "forest-meadow".equals(themeId) || "farm".equals(themeId);
     }
 
     private void seedThemes() {
