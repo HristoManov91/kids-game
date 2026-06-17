@@ -25,11 +25,14 @@ class QuizGeneratorTest {
     }
 
     @Test
-    void generatesTenBulgarianQuestionsForEveryMode() {
+    void generatesConfiguredBulgarianQuestionsForEveryMode() {
         for (QuizMode mode : QuizGenerator.BULGARIAN_PRIMITIVE_MODES) {
             List<GeneratedQuestion> questions = generator.generate(QuizCategory.BULGARIAN, mode, 1);
+            int expectedSize = mode == QuizMode.WORD_FIRST_LETTER_GROUP
+                    ? QuizGenerator.BULGARIAN_GROUPING_QUESTIONS_PER_TEST
+                    : QuizGenerator.BULGARIAN_QUESTIONS_PER_TEST;
 
-            assertThat(questions).hasSize(10);
+            assertThat(questions).hasSize(expectedSize);
             assertThat(questions)
                     .allSatisfy(question -> {
                         assertThat(question.answer()).isNotBlank();
@@ -98,7 +101,7 @@ class QuizGeneratorTest {
         List<GeneratedQuestion> questions = generator.generate(QuizCategory.BULGARIAN, QuizMode.WORD_FIRST_LETTER_GROUP, 2);
 
         assertThat(questions)
-                .hasSize(QuizGenerator.BULGARIAN_QUESTIONS_PER_TEST)
+                .hasSize(QuizGenerator.BULGARIAN_GROUPING_QUESTIONS_PER_TEST)
                 .allSatisfy(question -> {
                     assertThat(question.kind()).isEqualTo(QuestionKind.GROUPING);
                     assertThat(question.answerSlots()).hasSize(3).doesNotHaveDuplicates();
