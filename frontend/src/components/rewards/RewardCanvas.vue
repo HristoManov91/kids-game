@@ -94,6 +94,10 @@ function isImageAsset(image: string) {
   return image.startsWith('/') || image.startsWith('http') || image.startsWith('data:image')
 }
 
+function isMarvelAsset(image: string) {
+  return image.includes('cdn.marvel.com/')
+}
+
 onUnmounted(stopDrag)
 </script>
 
@@ -115,7 +119,13 @@ onUnmounted(stopDrag)
       @pointerdown="startDrag($event, item)"
       @click.stop="emit('select', item.id)"
     >
-      <img v-if="isImageAsset(item.image)" :src="item.image" :alt="item.name" draggable="false">
+      <img
+        v-if="isImageAsset(item.image)"
+        :src="item.image"
+        :alt="item.name"
+        :class="{ marvel: isMarvelAsset(item.image) }"
+        draggable="false"
+      >
       <span v-else>{{ item.image }}</span>
     </button>
 
@@ -189,6 +199,11 @@ onUnmounted(stopDrag)
   height: 100%;
   object-fit: contain;
   pointer-events: none;
+}
+
+.placed-item img.marvel {
+  object-fit: cover;
+  object-position: left center;
 }
 
 .placed-item span {

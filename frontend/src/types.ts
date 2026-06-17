@@ -442,6 +442,7 @@ export interface TaskSuggestionResponse {
 
 export interface AdminAttemptDetailResponse {
   attempt: AdminAttemptMonitorRow
+  children: UserResponse[]
   questions: AdminQuestionReviewRow[]
 }
 

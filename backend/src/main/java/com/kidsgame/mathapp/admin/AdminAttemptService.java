@@ -3,6 +3,7 @@ package com.kidsgame.mathapp.admin;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kidsgame.mathapp.auth.UserResponse;
 import com.kidsgame.mathapp.issue.QuestionIssueReportResponse;
 import com.kidsgame.mathapp.issue.QuestionIssueReportService;
 import com.kidsgame.mathapp.quiz.AnswerRecord;
@@ -14,6 +15,9 @@ import com.kidsgame.mathapp.quiz.QuestionScoring;
 import com.kidsgame.mathapp.quiz.QuizAttempt;
 import com.kidsgame.mathapp.quiz.QuizAttemptRepository;
 import com.kidsgame.mathapp.quiz.QuizMode;
+import com.kidsgame.mathapp.user.Role;
+import com.kidsgame.mathapp.user.UserEntity;
+import com.kidsgame.mathapp.user.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,15 +46,18 @@ public class AdminAttemptService {
     };
 
     private final QuizAttemptRepository attemptRepository;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final QuestionIssueReportService reportService;
 
     public AdminAttemptService(
             QuizAttemptRepository attemptRepository,
+            UserRepository userRepository,
             ObjectMapper objectMapper,
             QuestionIssueReportService reportService
     ) {
         this.attemptRepository = attemptRepository;
+        this.userRepository = userRepository;
         this.objectMapper = objectMapper;
         this.reportService = reportService;
     }
@@ -58,6 +65,18 @@ public class AdminAttemptService {
     @Transactional(readOnly = true)
     public AdminAttemptDetailResponse detail(UUID attemptId) {
         QuizAttempt attempt = loadAttempt(attemptId);
+        return detail(attempt);
+    }
+
+    @Transactional
+    public AdminAttemptDetailResponse updateOwner(UUID attemptId, AdminAttemptOwnerUpdateRequest request) {
+        QuizAttempt attempt = loadAttempt(attemptId);
+        UserEntity child = userRepository.findById(request.childId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Избраното дете не е намерено."));
+        if (child.getRole() != Role.CHILD) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Тестът може да се прехвърли само към детски профил.");
+        }
+        attempt.moveToUser(child);
         return detail(attempt);
     }
 
@@ -101,10 +120,17 @@ public class AdminAttemptService {
 
         return new AdminAttemptDetailResponse(
                 attemptRow(attempt, answersByQuestion.size()),
+                children(),
                 questions.stream()
                         .map(question -> questionRow(question, answersByQuestion.get(question.id()), reportsByQuestion.getOrDefault(question.id(), List.of())))
                         .toList()
         );
+    }
+
+    private List<UserResponse> children() {
+        return userRepository.findByRoleOrderByDisplayNameAsc(Role.CHILD).stream()
+                .map(child -> new UserResponse(child.getId(), child.getUsername(), child.getDisplayName(), child.getRole()))
+                .toList();
     }
 
     private AdminAttemptDetailResponse.QuestionReviewRow questionRow(

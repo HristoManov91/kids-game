@@ -109,6 +109,10 @@ public class QuizAttempt {
         return user;
     }
 
+    public void moveToUser(UserEntity user) {
+        this.user = user;
+    }
+
     public QuizCategory getCategory() {
         return category;
     }

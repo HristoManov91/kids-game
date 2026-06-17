@@ -183,7 +183,7 @@ public class RewardCatalog {
     }
 
     private boolean defaultThemeActive(String themeId) {
-        return "forest-meadow".equals(themeId) || "farm".equals(themeId);
+        return "forest-meadow".equals(themeId) || "farm".equals(themeId) || "superheroes".equals(themeId);
     }
 
     private void seedThemes() {
@@ -197,6 +197,8 @@ public class RewardCatalog {
                 "url('/api/reward-assets/static-farm-farm-background') center/cover no-repeat", "🚜", "Моята ферма");
         addTheme("jungle", "Джунгла", "Големи листа, лиани и животни.",
                 "url('/api/reward-assets/static-jungle-jungle-background') center/cover no-repeat", "🦜", "Моята джунгла");
+        addTheme("superheroes", "Супергеройска вселена", "Герои, щитове, брони и силни приключения.",
+                "linear-gradient(180deg, #0d172d 0%, #263a73 46%, #d7e6ff 47%, #f3f6fb 100%)", "https://cdn.marvel.com/content/2x/003cap_ons_cut_dsk_01.webp", "Моята супергеройска вселена");
     }
 
     private void seedItems() {
@@ -396,6 +398,29 @@ public class RewardCatalog {
         addItem("jungle-hippo", "jungle", "Животни", "Хипопотам", 90, "/reward-assets/polished/jungle/hippo.png", 1.05, 0.50, 2.25);
         addItem("jungle-frog", "jungle", "Животни", "Жаба", 35, "/reward-assets/polished/jungle/frog.png", 0.70, 0.35, 1.55);
         addItem("jungle-butterfly", "jungle", "Животни", "Пеперуда", 30, "/reward-assets/polished/jungle/butterfly.png", 0.65, 0.32, 1.45);
+
+        addItem("super-captain-america", "superheroes", "Герои", "Капитан Америка", 120, "https://cdn.marvel.com/content/2x/003cap_ons_cut_dsk_01.webp", 1.05, 0.50, 2.25);
+        addItem("super-iron-man", "superheroes", "Герои", "Железният човек", 130, "https://cdn.marvel.com/content/2x/002irm_ons_cut_dsk_01_0.webp", 1.05, 0.50, 2.25);
+        addItem("super-thor", "superheroes", "Герои", "Тор", 125, "https://cdn.marvel.com/content/2x/004tho_ons_cut_dsk_01_1.webp", 1.05, 0.50, 2.25);
+        addItem("super-hulk", "superheroes", "Герои", "Хълк", 125, "https://cdn.marvel.com/content/2x/006hbb_ons_cut_dsk_01_2.webp", 1.10, 0.55, 2.35);
+        addItem("super-spider-hero", "superheroes", "Герои", "Човекът паяк", 115, "https://cdn.marvel.com/content/2x/005smp_ons_cut_dsk_01_0.webp", 1.00, 0.45, 2.15);
+        addItem("super-doctor-strange", "superheroes", "Герои", "Доктор Стрейндж", 120, "https://cdn.marvel.com/content/2x/009drs_ons_cut_dsk_01_0.jpg", 1.00, 0.45, 2.15);
+        addItem("super-black-widow", "superheroes", "Герои", "Черната вдовица", 105, "https://cdn.marvel.com/content/2x/011blw_ons_cut_dsk_03.webp", 0.95, 0.45, 2.05);
+        addItem("super-hawkeye", "superheroes", "Герои", "Ястребово око", 105, "https://cdn.marvel.com/content/2x/018hcb_ons_cut_dsk_01_0.webp", 0.95, 0.45, 2.05);
+        addItem("super-wolverine", "superheroes", "Герои", "Черната пантера", 110, "https://cdn.marvel.com/content/2x/007blp_ons_cut_dsk_01_0.webp", 1.00, 0.45, 2.15);
+        addItem("super-star-hero", "superheroes", "Герои", "Капитан Марвел", 90, "https://cdn.marvel.com/content/2x/008cmv_ons_cut_dsk_03_0.webp", 0.95, 0.45, 2.05);
+        addItem("super-star-shield", "superheroes", "Екипировка", "Щитът на Капитан Америка", 70, "https://cdn.marvel.com/content/2x/003cap_ons_cut_dsk_01.webp", 0.90, 0.40, 2.00);
+        addItem("super-arc-core", "superheroes", "Екипировка", "Бронята на Железния човек", 75, "https://cdn.marvel.com/content/2x/002irm_ons_cut_dsk_01_0.webp", 0.85, 0.40, 1.90);
+        addItem("super-hammer", "superheroes", "Екипировка", "Тор с Мьолнир", 80, "https://cdn.marvel.com/content/2x/004tho_ons_cut_dsk_01_1.webp", 0.95, 0.45, 2.05);
+        addItem("super-power-fist", "superheroes", "Сили", "Хълк смазва", 65, "https://cdn.marvel.com/content/2x/006hbb_ons_cut_dsk_01_2.webp", 0.90, 0.40, 2.00);
+        addItem("super-web", "superheroes", "Сили", "Паяжината на Спайдърмен", 45, "https://cdn.marvel.com/content/2x/005smp_ons_cut_dsk_01_0.webp", 0.95, 0.45, 2.05);
+        addItem("super-magic-portal", "superheroes", "Сили", "Магията на Доктор Стрейндж", 85, "https://cdn.marvel.com/content/2x/009drs_ons_cut_dsk_01_0.jpg", 1.05, 0.50, 2.25);
+        addItem("super-cape", "superheroes", "Екипировка", "Космическа сила", 55, "https://cdn.marvel.com/content/2x/008cmv_ons_cut_dsk_03_0.webp", 0.95, 0.45, 2.05);
+        addItem("super-mask", "superheroes", "Екипировка", "Маската на Черната пантера", 40, "https://cdn.marvel.com/content/2x/007blp_ons_cut_dsk_01_0.webp", 0.85, 0.40, 1.90);
+        addItem("super-city", "superheroes", "Град", "Отборът Отмъстителите", 90, "https://cdn.marvel.com/content/2x/013vis_ons_cut_dsk_01_0.webp", 1.25, 0.60, 2.70);
+        addItem("super-headquarters", "superheroes", "Град", "Мисията на Отмъстителите", 110, "https://cdn.marvel.com/content/2x/010ant_ons_cut_dsk_01_1.webp", 1.20, 0.55, 2.55);
+        addItem("super-energy-crystal", "superheroes", "Украси", "Сила от Ваканда", 35, "https://cdn.marvel.com/content/2x/007blp_ons_cut_dsk_01_0.webp", 0.70, 0.35, 1.60);
+        addItem("super-comic-burst", "superheroes", "Украси", "Отмъстителски удар", 30, "https://cdn.marvel.com/content/2x/018hcb_ons_cut_dsk_01_0.webp", 0.80, 0.38, 1.75);
     }
 
     private void addTheme(String id, String name, String description, String background, String thumbnail, String defaultName) {
@@ -405,7 +430,7 @@ public class RewardCatalog {
                 description,
                 background,
                 thumbnail,
-                List.of("Природа", "Животни", "Предмети", "Украси", "Хора", "Небе", "Храна", "Спорт", "Герои", "Пътеки", "Космос", "Планети", "Кораби", "Станции", "Галактики", "Риби", "Морски животни", "Морско дъно", "Растения", "Корали", "Съкровища", "Сгради", "Машини", "Птици", "Плодове", "Вода"),
+                List.of("Природа", "Животни", "Предмети", "Украси", "Хора", "Небе", "Храна", "Спорт", "Герои", "Пътеки", "Космос", "Планети", "Кораби", "Станции", "Галактики", "Риби", "Морски животни", "Морско дъно", "Растения", "Корали", "Съкровища", "Сгради", "Машини", "Птици", "Плодове", "Вода", "Екипировка", "Сили", "Град"),
                 defaultName
         ));
     }

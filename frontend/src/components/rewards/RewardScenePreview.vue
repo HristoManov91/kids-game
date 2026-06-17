@@ -21,6 +21,10 @@ function isImageAsset(image: string) {
   return image.startsWith('/') || image.startsWith('http') || image.startsWith('data:image')
 }
 
+function isMarvelAsset(image: string) {
+  return image.includes('cdn.marvel.com/')
+}
+
 function hideBrokenImage(event: Event) {
   const target = event.target as HTMLImageElement | null
   if (!target) {
@@ -39,7 +43,14 @@ function hideBrokenImage(event: Event) {
       :style="itemStyle(item)"
       aria-hidden="true"
     >
-      <img v-if="isImageAsset(item.image)" :src="item.image" :alt="item.name" draggable="false" @error="hideBrokenImage">
+      <img
+        v-if="isImageAsset(item.image)"
+        :src="item.image"
+        :alt="item.name"
+        :class="{ marvel: isMarvelAsset(item.image) }"
+        draggable="false"
+        @error="hideBrokenImage"
+      >
       <span v-else>{{ item.image }}</span>
     </span>
   </div>
@@ -72,6 +83,11 @@ function hideBrokenImage(event: Event) {
   height: 100%;
   object-fit: contain;
   pointer-events: none;
+}
+
+.preview-item img.marvel {
+  object-fit: cover;
+  object-position: left center;
 }
 
 .preview-item span {

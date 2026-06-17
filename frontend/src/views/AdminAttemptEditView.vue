@@ -16,8 +16,10 @@ const router = useRouter()
 const selectedAttempt = ref<AdminAttemptDetailResponse | null>(null)
 const editedAnswers = ref<Record<number, string>>({})
 const reportNotes = ref<Record<number, string>>({})
+const selectedOwnerId = ref<number | null>(null)
 const loading = ref(false)
 const savingQuestionId = ref<number | null>(null)
+const savingOwner = ref(false)
 const error = ref('')
 
 onMounted(() => {
@@ -30,6 +32,7 @@ async function loadAttempt() {
   error.value = ''
   try {
     selectedAttempt.value = await api.get<AdminAttemptDetailResponse>(`/admin/monitoring/attempts/${attemptId}`)
+    selectedOwnerId.value = selectedAttempt.value.attempt.userId
     editedAnswers.value = Object.fromEntries(
       selectedAttempt.value.questions.map((question) => [question.questionId, question.answer])
     )
@@ -103,6 +106,25 @@ async function saveAnswer(question: AdminQuestionReviewRow) {
   }
 }
 
+async function saveOwner() {
+  if (!selectedAttempt.value || selectedOwnerId.value === null) {
+    return
+  }
+  savingOwner.value = true
+  error.value = ''
+  try {
+    selectedAttempt.value = await api.put<AdminAttemptDetailResponse>(
+      `/admin/monitoring/attempts/${selectedAttempt.value.attempt.attemptId}/owner`,
+      { childId: selectedOwnerId.value }
+    )
+    selectedOwnerId.value = selectedAttempt.value.attempt.userId
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Профилът за теста не беше записан.'
+  } finally {
+    savingOwner.value = false
+  }
+}
+
 async function updateReport(report: QuestionIssueReportResponse, status: IssueReportStatus) {
   error.value = ''
   try {
@@ -153,6 +175,25 @@ function reportStatusLabel(status: IssueReportStatus) {
         <div>
           <h2 class="panel-title">Въпроси и отговори</h2>
           <p class="muted">Завършен: {{ formatDateTime(selectedAttempt.attempt.completedAt) }}</p>
+        </div>
+        <div class="owner-editor">
+          <label class="field owner-field">
+            <span>Решавал</span>
+            <select v-model.number="selectedOwnerId">
+              <option v-for="child in selectedAttempt.children" :key="child.id" :value="child.id">
+                {{ child.displayName }}
+              </option>
+            </select>
+          </label>
+          <button
+            class="mini-button green"
+            type="button"
+            :disabled="savingOwner || selectedOwnerId === selectedAttempt.attempt.userId"
+            @click="saveOwner"
+          >
+            <Save :size="16" />
+            <span>Запази профил</span>
+          </button>
         </div>
       </div>
 
@@ -223,8 +264,33 @@ function reportStatusLabel(status: IssueReportStatus) {
 }
 
 .panel-header.compact {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(36, 48, 74, 0.1);
+}
+
+.owner-editor {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.owner-field {
+  min-width: 220px;
+}
+
+.owner-field select {
+  min-height: 42px;
+  border: 1px solid rgba(36, 48, 74, 0.16);
+  border-radius: var(--radius);
+  padding: 0 12px;
+  color: var(--ink);
+  background: #ffffff;
+  font: inherit;
+  font-weight: 900;
 }
 
 .empty-state {
@@ -354,11 +420,18 @@ function reportStatusLabel(status: IssueReportStatus) {
 
 @media (max-width: 980px) {
   .attempt-hero,
+  .panel-header.compact,
   .question-review-row {
     grid-template-columns: 1fr;
   }
 
+  .panel-header.compact,
   .attempt-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .owner-editor {
     align-items: stretch;
     flex-direction: column;
   }

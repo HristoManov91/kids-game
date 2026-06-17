@@ -62,6 +62,14 @@ public class AdminMonitoringController {
         return attemptService.updateAnswer(attemptId, questionId, request);
     }
 
+    @PutMapping("/attempts/{attemptId}/owner")
+    public AdminAttemptDetailResponse updateAttemptOwner(
+            @PathVariable UUID attemptId,
+            @Valid @RequestBody AdminAttemptOwnerUpdateRequest request
+    ) {
+        return attemptService.updateOwner(attemptId, request);
+    }
+
     @PutMapping("/issue-reports/{reportId}")
     public QuestionIssueReportResponse updateIssueReport(
             @PathVariable Long reportId,

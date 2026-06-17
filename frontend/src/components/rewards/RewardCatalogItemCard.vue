@@ -14,12 +14,19 @@ defineEmits<{
 
 const canBuy = () => props.crystals >= props.item.price && !props.busy
 const isImageAsset = (image: string) => image.startsWith('/') || image.startsWith('http') || image.startsWith('data:image')
+const isMarvelAsset = (image: string) => image.includes('cdn.marvel.com/')
 </script>
 
 <template>
   <article class="catalog-card" :class="{ disabled: !canBuy() }">
     <div class="item-art" aria-hidden="true">
-      <img v-if="isImageAsset(item.image)" :src="item.image" :alt="item.name" draggable="false">
+      <img
+        v-if="isImageAsset(item.image)"
+        :src="item.image"
+        :alt="item.name"
+        :class="{ marvel: isMarvelAsset(item.image) }"
+        draggable="false"
+      >
       <span v-else>{{ item.image }}</span>
     </div>
     <div class="item-body">
@@ -70,6 +77,11 @@ const isImageAsset = (image: string) => image.startsWith('/') || image.startsWit
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.item-art img.marvel {
+  object-fit: cover;
+  object-position: left center;
 }
 
 .item-body {

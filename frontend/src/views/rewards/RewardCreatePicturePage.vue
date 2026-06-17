@@ -14,7 +14,11 @@ const saving = ref(false)
 const selectedTheme = computed(() => rewards.themes.find((theme) => theme.id === selectedThemeId.value) ?? rewards.themes[0])
 
 function isAssetThumbnail(thumbnail: string) {
-  return thumbnail.startsWith('/')
+  return thumbnail.startsWith('/') || thumbnail.startsWith('http') || thumbnail.startsWith('data:image')
+}
+
+function isMarvelAsset(image: string) {
+  return image.includes('cdn.marvel.com/')
 }
 
 onMounted(async () => {
@@ -65,7 +69,12 @@ async function createPicture() {
           @click="selectedThemeId = theme.id"
         >
           <span class="theme-art" :style="{ background: theme.backgroundImage }">
-            <img v-if="isAssetThumbnail(theme.thumbnailImage)" :src="theme.thumbnailImage" :alt="theme.name" />
+            <img
+              v-if="isAssetThumbnail(theme.thumbnailImage)"
+              :src="theme.thumbnailImage"
+              :alt="theme.name"
+              :class="{ marvel: isMarvelAsset(theme.thumbnailImage) }"
+            />
             <span v-else>{{ theme.thumbnailImage }}</span>
           </span>
           <strong>{{ theme.name }}</strong>
@@ -161,6 +170,13 @@ async function createPicture() {
   width: min(74%, 150px);
   height: min(80%, 116px);
   object-fit: contain;
+}
+
+.theme-art img.marvel {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left center;
 }
 
 .theme-card strong {
