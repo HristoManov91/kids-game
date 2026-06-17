@@ -18,8 +18,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class QuizGenerator {
     public static final int QUESTIONS_PER_TEST = 20;
     public static final int SINGLE_QUESTIONS_PER_TEST = 10;
-    public static final int BULGARIAN_QUESTIONS_PER_TEST = 5;
-    public static final int BULGARIAN_GROUPING_QUESTIONS_PER_TEST = 1;
+    public static final int BULGARIAN_QUESTIONS_PER_TEST = 10;
+    public static final int BULGARIAN_GROUPING_QUESTIONS_PER_TEST = 5;
     public static final int LOGIC_QUESTIONS_PER_TEST = 10;
     private static final Locale BG = Locale.forLanguageTag("bg-BG");
 
@@ -87,7 +87,7 @@ public class QuizGenerator {
     public List<GeneratedQuestion> generate(QuizCategory category, QuizMode mode, int difficulty) {
         if (category == QuizCategory.BULGARIAN) {
             if (mode == QuizMode.ALL_GROUP) {
-                return generateBulgarian(BULGARIAN_PRIMITIVE_MODES, difficulty, BULGARIAN_QUESTIONS_PER_TEST);
+                return generateBulgarian(BULGARIAN_PRIMITIVE_MODES, difficulty, QUESTIONS_PER_TEST);
             }
             if (mode == QuizMode.CUSTOM_GROUP) {
                 throw new IllegalArgumentException("Тестовете по избор трябва да имат избрани категории.");
@@ -129,7 +129,7 @@ public class QuizGenerator {
 
     public List<GeneratedQuestion> generate(QuizCategory category, Collection<QuizMode> modes, int difficulty) {
         if (category == QuizCategory.BULGARIAN) {
-            return generateBulgarian(modes, difficulty, bulgarianQuestionCount(modes));
+            return generateBulgarian(modes, difficulty, bulgarianGroupedQuestionCount(modes));
         }
         if (category == QuizCategory.LOGIC) {
             return generateLogic(modes, difficulty);
@@ -275,14 +275,25 @@ public class QuizGenerator {
     }
 
     private int bulgarianQuestionCount(Collection<QuizMode> modes) {
+        if (containsOnlyFirstLetterGrouping(modes)) {
+            return BULGARIAN_GROUPING_QUESTIONS_PER_TEST;
+        }
+        return BULGARIAN_QUESTIONS_PER_TEST;
+    }
+
+    private int bulgarianGroupedQuestionCount(Collection<QuizMode> modes) {
+        if (containsOnlyFirstLetterGrouping(modes)) {
+            return BULGARIAN_GROUPING_QUESTIONS_PER_TEST;
+        }
+        return QUESTIONS_PER_TEST;
+    }
+
+    private boolean containsOnlyFirstLetterGrouping(Collection<QuizMode> modes) {
         List<QuizMode> availableModes = modes.stream()
                 .filter(BULGARIAN_PRIMITIVE_MODES::contains)
                 .distinct()
                 .toList();
-        if (availableModes.size() == 1 && availableModes.get(0) == QuizMode.WORD_FIRST_LETTER_GROUP) {
-            return BULGARIAN_GROUPING_QUESTIONS_PER_TEST;
-        }
-        return BULGARIAN_QUESTIONS_PER_TEST;
+        return availableModes.size() == 1 && availableModes.get(0) == QuizMode.WORD_FIRST_LETTER_GROUP;
     }
 
     private List<BulgarianWordCatalog.BulgarianWordEntry> wordPool(QuizMode mode, int difficulty, ThreadLocalRandom random) {
