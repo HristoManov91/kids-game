@@ -74,6 +74,13 @@ class QuizGeneratorTest {
     }
 
     @Test
+    void bulgarianAllGroupKeepsDefaultMixedQuestionCount() {
+        List<GeneratedQuestion> questions = generator.generate(QuizCategory.BULGARIAN, QuizMode.ALL_GROUP, 3);
+
+        assertThat(questions).hasSize(QuizGenerator.QUESTIONS_PER_TEST);
+    }
+
+    @Test
     void bulgarianMissingLetterQuestionsFollowDifficultyPositions() {
         List<GeneratedQuestion> levelOne = generator.generate(QuizCategory.BULGARIAN, QuizMode.WORD_MISSING_LETTER, 1);
         List<GeneratedQuestion> levelTwo = generator.generate(QuizCategory.BULGARIAN, QuizMode.WORD_MISSING_LETTER, 2);
