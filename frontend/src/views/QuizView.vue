@@ -439,6 +439,7 @@ onMounted(async () => {
       void syncActiveTime(false)
     }
   }, 5000)
+  window.addEventListener('keydown', handleGlobalKeydown)
   document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
@@ -451,6 +452,7 @@ onUnmounted(() => {
   }
   clearMemoryTimers()
   clearPatternTimers()
+  window.removeEventListener('keydown', handleGlobalKeydown)
   document.removeEventListener('visibilitychange', handleVisibilityChange)
   if (activeStartedAt.value || shouldTrackActiveTime()) {
     void syncActiveTime(false)
@@ -2048,7 +2050,31 @@ async function nextQuestion() {
 }
 
 async function handleEnter() {
-  await nextQuestion()
+  await submitAnswer()
+}
+
+function isInteractiveKeyboardTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false
+  }
+  const tagName = target.tagName.toLowerCase()
+  return target.isContentEditable || ['input', 'textarea', 'select', 'button', 'a'].includes(tagName)
+}
+
+async function handleGlobalKeydown(event: KeyboardEvent) {
+  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || isInteractiveKeyboardTarget(event.target)) {
+    return
+  }
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+    await previousQuestion()
+  } else if (event.key === 'ArrowRight') {
+    event.preventDefault()
+    await nextQuestion()
+  } else if (event.key === 'Enter') {
+    event.preventDefault()
+    await submitAnswer()
+  }
 }
 
 async function finishQuiz() {
