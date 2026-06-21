@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
-import { Activity, AlertCircle, BarChart3, CheckCircle2, Gem, Gift, Home, Images, Info, LogOut, Palette, UserRound } from 'lucide-vue-next'
+import { Activity, AlertCircle, BarChart3, CheckCircle2, Gem, Gift, Home, Images, Info, LogOut, Palette, UserCog, UserRound } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
 import { useQuizStore } from '@/stores/quiz'
 import { useRewardsStore } from '@/stores/rewards'
@@ -112,6 +112,18 @@ function closeNavTooltip() {
       </RouterLink>
 
       <nav class="topnav" aria-label="Главна навигация">
+        <RouterLink
+          class="icon-button"
+          to="/account"
+          title="Профил"
+          aria-label="Профил"
+          @mouseenter="openNavTooltip($event, 'Профил')"
+          @mouseleave="closeNavTooltip"
+          @focus="openNavTooltip($event, 'Профил')"
+          @blur="closeNavTooltip"
+        >
+          <UserCog :size="20" />
+        </RouterLink>
         <RouterLink
           class="icon-button"
           to="/app"

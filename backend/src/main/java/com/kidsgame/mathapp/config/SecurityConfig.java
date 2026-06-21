@@ -53,6 +53,9 @@ public class SecurityConfig {
                                 "/vite.svg",
                                 "/login",
                                 "/register",
+                                "/forgot-password",
+                                "/reset-password",
+                                "/account",
                                 "/app",
                                 "/alphabet",
                                 "/numbers",
@@ -69,6 +72,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                         .requestMatchers("/api/reward-assets/**").permitAll()
                         .requestMatchers("/api/admin/**")
                         .access((authentication, context) -> new AuthorizationDecision(adminAccess.isAdmin(authentication.get())))

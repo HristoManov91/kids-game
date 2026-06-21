@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -40,6 +41,7 @@ public class JwtService {
             Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("sub", principal.getUsername());
             payload.put("uid", principal.id());
+            payload.put("pwd", passwordVersion(principal.getPassword()));
             payload.put("exp", Instant.now().plusSeconds(tokenTtlHours * 3600).getEpochSecond());
 
             String headerPart = encodeJson(header);
@@ -52,6 +54,22 @@ public class JwtService {
     }
 
     public Optional<String> validateAndReadUsername(String token) {
+        return validateAndReadPayload(token)
+                .map(payload -> payload.get("sub"))
+                .filter(String.class::isInstance)
+                .map(String.class::cast);
+    }
+
+    public boolean isValidFor(String token, UserDetails userDetails) {
+        return validateAndReadPayload(token).map(payload -> {
+            Object subject = payload.get("sub");
+            Object passwordVersion = payload.get("pwd");
+            return userDetails.getUsername().equals(subject)
+                    && passwordVersion(userDetails.getPassword()).equals(passwordVersion);
+        }).orElse(false);
+    }
+
+    private Optional<Map<String, Object>> validateAndReadPayload(String token) {
         try {
             String[] parts = token.split("\\.");
             if (parts.length != 3) {
@@ -68,10 +86,19 @@ public class JwtService {
             if (!(exp instanceof Number expiration) || expiration.longValue() < Instant.now().getEpochSecond()) {
                 return Optional.empty();
             }
-            Object subject = payload.get("sub");
-            return subject instanceof String username ? Optional.of(username) : Optional.empty();
+            return Optional.of(payload);
         } catch (Exception ex) {
             return Optional.empty();
+        }
+    }
+
+    private String passwordVersion(String passwordHash) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(passwordHash.getBytes(StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(digest).substring(0, 16);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Could not calculate password version", ex);
         }
     }
 

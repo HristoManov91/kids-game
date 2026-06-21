@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,17 +27,20 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetService passwordResetService;
 
     public AuthController(
             AuthenticationManager authenticationManager,
             JwtService jwtService,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            PasswordResetService passwordResetService
     ) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.passwordResetService = passwordResetService;
     }
 
     @PostMapping("/login")
@@ -66,6 +70,10 @@ public class AuthController {
         if (userRepository.existsByUsernameIgnoreCase(username)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Акаунтът вече съществува.");
         }
+        String email = request.email().trim().toLowerCase(java.util.Locale.ROOT);
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email адресът вече се използва.");
+        }
 
         UserEntity user = new UserEntity(
                 username,
@@ -73,13 +81,54 @@ public class AuthController {
                 passwordEncoder.encode(request.password()),
                 Role.CHILD
         );
+        user.updateEmail(email);
         UserPrincipal principal = new UserPrincipal(userRepository.save(user));
         return new AuthResponse(jwtService.createToken(principal), UserResponse.from(principal));
+    }
+
+    @PostMapping("/forgot-password")
+    public MessageResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestReset(request.email());
+        return new MessageResponse("Ако има профил с този email, изпратихме инструкции за нова парола.");
+    }
+
+    @PostMapping("/reset-password")
+    public MessageResponse resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        if (!request.password().equals(request.repeatPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Паролите не съвпадат.");
+        }
+        passwordResetService.resetPassword(request.token(), request.password());
+        return new MessageResponse("Паролата е сменена. Вече можеш да влезеш.");
     }
 
     @GetMapping("/me")
     public UserResponse me(@AuthenticationPrincipal UserPrincipal principal) {
         return UserResponse.from(principal);
+    }
+
+    @PutMapping("/email")
+    public AccountEmailResponse updateEmail(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody UpdateEmailRequest request
+    ) {
+        String email = request.email().trim().toLowerCase(java.util.Locale.ROOT);
+        userRepository.findByEmailIgnoreCase(email)
+                .filter(existing -> !existing.getId().equals(principal.id()))
+                .ifPresent(existing -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Email адресът вече се използва.");
+                });
+        UserEntity user = userRepository.findById(principal.id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Профилът не е намерен."));
+        user.updateEmail(email);
+        UserEntity saved = userRepository.save(user);
+        return new AccountEmailResponse(saved.getEmail());
+    }
+
+    @GetMapping("/email")
+    public AccountEmailResponse email(@AuthenticationPrincipal UserPrincipal principal) {
+        UserEntity user = userRepository.findById(principal.id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Профилът не е намерен."));
+        return new AccountEmailResponse(user.getEmail());
     }
 
     @PostMapping("/children")

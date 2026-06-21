@@ -57,6 +57,8 @@ function fillDemo(nextUsername: string, nextPassword: string) {
         <input v-model="password" type="password" autocomplete="current-password" required />
       </label>
 
+      <RouterLink class="forgot-link" to="/forgot-password">Забравена парола?</RouterLink>
+
       <button class="button" type="submit" :disabled="auth.loading">
         <LogIn :size="20" />
         <span>Влез</span>
@@ -145,6 +147,13 @@ h1 {
 .register-button {
   width: 100%;
   text-decoration: none;
+}
+
+.forgot-link {
+  justify-self: end;
+  margin-top: -8px;
+  color: var(--blue);
+  font-weight: 800;
 }
 
 @media (max-width: 800px) {

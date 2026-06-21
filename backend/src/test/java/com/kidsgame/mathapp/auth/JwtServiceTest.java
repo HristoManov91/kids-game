@@ -69,6 +69,18 @@ class JwtServiceTest {
         assertThat(service.validateAndReadUsername("one.two.three.four")).isEmpty();
     }
 
+    @Test
+    void invalidatesTokenAfterPasswordChanges() {
+        JwtService service = new JwtService("test-secret-with-enough-entropy", 336, objectMapper);
+        UserPrincipal original = principal("mila");
+        String token = service.createToken(original);
+        UserEntity changedUser = new UserEntity("mila", "Мила", "different-hash", Role.CHILD);
+        ReflectionTestUtils.setField(changedUser, "id", 42L);
+
+        assertThat(service.isValidFor(token, original)).isTrue();
+        assertThat(service.isValidFor(token, new UserPrincipal(changedUser))).isFalse();
+    }
+
     private UserPrincipal principal(String username) {
         return principal(username, Role.CHILD);
     }

@@ -47,6 +47,8 @@ public class ApiExceptionHandler {
     private String fieldErrorMessage(FieldError error) {
         return switch (error.getField()) {
             case "username" -> "Въведи акаунт.";
+            case "email" -> "Въведи валиден email адрес.";
+            case "token" -> "Линкът за нова парола е невалиден.";
             case "password" -> "Въведи парола.";
             case "repeatPassword" -> "Повтори паролата.";
             case "word" -> "Въведи дума.";

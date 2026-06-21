@@ -8,6 +8,7 @@ const auth = useAuthStore()
 const router = useRouter()
 
 const username = ref('')
+const email = ref('')
 const password = ref('')
 const repeatPassword = ref('')
 const error = ref('')
@@ -19,7 +20,7 @@ async function submit() {
     return
   }
   try {
-    await auth.register(username.value, password.value, repeatPassword.value)
+    await auth.register(username.value, email.value, password.value, repeatPassword.value)
     router.push({ name: 'dashboard' })
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Регистрацията не беше успешна.'
@@ -35,7 +36,7 @@ async function submit() {
         <span>Нов профил</span>
       </div>
       <h1>Създай акаунт</h1>
-      <p>Нужни са само акаунт и парола. След това започваш веднага.</p>
+      <p>Email-ът служи само за сигурно възстановяване на паролата.</p>
     </div>
 
     <form class="login-panel panel" @submit.prevent="submit">
@@ -47,6 +48,11 @@ async function submit() {
       <label class="field">
         <span>Акаунт</span>
         <input v-model.trim="username" autocomplete="username" required minlength="3" maxlength="60" />
+      </label>
+
+      <label class="field">
+        <span>Email</span>
+        <input v-model.trim="email" type="email" autocomplete="email" required maxlength="254" />
       </label>
 
       <label class="field">

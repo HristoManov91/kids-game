@@ -58,4 +58,3 @@ public class UserPrincipal implements UserDetails {
         return enabled;
     }
 }
-

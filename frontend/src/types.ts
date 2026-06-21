@@ -45,6 +45,10 @@ export interface AuthResponse {
   user: UserResponse
 }
 
+export interface MessageResponse {
+  message: string
+}
+
 export interface QuestionResponse {
   id: number
   kind: QuestionKind

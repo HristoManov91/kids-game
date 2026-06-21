@@ -37,7 +37,7 @@ postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
 DB_URL=postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
 APP_JWT_SECRET=replace-with-a-long-random-secret
 APP_DEMO_SEED_ENABLED=false
-APP_TOKEN_TTL_HOURS=12
+APP_TOKEN_TTL_HOURS=336
 ```
 
 ## 3. Качи Кода В Space-а

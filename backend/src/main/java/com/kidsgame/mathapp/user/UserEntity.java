@@ -24,6 +24,9 @@ public class UserEntity {
     @Column(nullable = false, length = 120)
     private String displayName;
 
+    @Column(length = 254)
+    private String email;
+
     @Column(nullable = false)
     private String passwordHash;
 
@@ -63,6 +66,14 @@ public class UserEntity {
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
     }
 
     public Role getRole() {

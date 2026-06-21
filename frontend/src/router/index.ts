@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
+import ResetPasswordView from '@/views/ResetPasswordView.vue'
+import AccountView from '@/views/AccountView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import QuizView from '@/views/QuizView.vue'
 import ResultView from '@/views/ResultView.vue'
@@ -23,6 +26,9 @@ const router = createRouter({
     { path: '/', redirect: '/app' },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
+    { path: '/forgot-password', name: 'forgotPassword', component: ForgotPasswordView },
+    { path: '/reset-password', name: 'resetPassword', component: ResetPasswordView },
+    { path: '/account', name: 'account', component: AccountView, meta: { requiresAuth: true } },
     { path: '/app', name: 'dashboard', component: DashboardView, meta: { requiresAuth: true } },
     { path: '/alphabet', name: 'alphabet', component: AlphabetView, meta: { requiresAuth: true } },
     { path: '/numbers', name: 'numbers', component: NumberPracticeView, meta: { requiresAuth: true } },
@@ -58,7 +64,7 @@ router.beforeEach(async (to) => {
     return { name: 'dashboard' }
   }
 
-  if ((to.name === 'login' || to.name === 'register') && auth.token) {
+  if ((to.name === 'login' || to.name === 'register' || to.name === 'forgotPassword' || to.name === 'resetPassword') && auth.token) {
     return { name: 'dashboard' }
   }
 })

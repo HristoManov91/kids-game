@@ -19,6 +19,14 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  mail:
+    host: ${APP_SMTP_HOST:localhost}
+    port: ${APP_SMTP_PORT:587}
+    username: ${APP_SMTP_USERNAME:}
+    password: ${APP_SMTP_PASSWORD:}
+    properties.mail.smtp:
+      auth: ${APP_SMTP_AUTH:true}
+      starttls.enable: ${APP_SMTP_STARTTLS:true}
 
 app:
   demo:
@@ -30,6 +38,11 @@ app:
       display-name: ${APP_ADMIN_DISPLAY_NAME:Администратор}
   security:
     jwt-secret: ${APP_JWT_SECRET:local-dev-secret-change-before-deploying-this-app-please}
-    token-ttl-hours: ${APP_TOKEN_TTL_HOURS:12}
+    token-ttl-hours: ${APP_TOKEN_TTL_HOURS:336}
+    password-reset:
+      token-ttl-minutes: ${APP_PASSWORD_RESET_TTL_MINUTES:30}
+      delivery: ${APP_PASSWORD_RESET_DELIVERY:log}
+      frontend-base-url: ${APP_FRONTEND_BASE_URL:http://localhost:5173}
+      from: ${APP_MAIL_FROM:no-reply@kids-game.local}
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}

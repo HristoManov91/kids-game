@@ -95,6 +95,12 @@ class SecurityConfigTest {
 
         mockMvc.perform(get("/login"))
                 .andExpect(status().isOk());
+
+        mockMvc.perform(get("/forgot-password"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/reset-password").queryParam("token", "test-token"))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -139,6 +145,7 @@ class SecurityConfigTest {
         when(jwtService.validateAndReadUsername("valid-token")).thenReturn(Optional.of("mila"));
         when(jwtService.validateAndReadUsername("bad-token")).thenReturn(Optional.empty());
         when(userDetailsService.loadUserByUsername("mila")).thenReturn(principal);
+        when(jwtService.isValidFor("valid-token", principal)).thenReturn(true);
 
         mockMvc.perform(get("/api/rewards/catalog").header("Authorization", "Bearer valid-token"))
                 .andExpect(status().isOk());

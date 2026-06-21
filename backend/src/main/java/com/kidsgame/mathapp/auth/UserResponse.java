@@ -7,4 +7,3 @@ public record UserResponse(Long id, String username, String displayName, Role ro
         return new UserResponse(principal.id(), principal.getUsername(), principal.displayName(), principal.role());
     }
 }
-
