@@ -41,8 +41,11 @@ jobs:
           echo "::add-mask::${hf_token}"
           echo "HF_TOKEN=${hf_token}" >> "${GITHUB_ENV}"
 
-      - name: Push main to the production Space
-        shell: bash
-        run: |
-          set -euo pipefail
-          git push "https://manoraev:${HF_TOKEN}@huggingface.co/spaces/manoraev/kids-game" HEAD:main
+      - name: Sync main to the production Space
+        uses: huggingface/hub-sync@v0.1.0
+        with:
+          github_repo_id: ${{ github.repository }}
+          huggingface_repo_id: manoraev/kids-game
+          hf_token: ${{ env.HF_TOKEN }}
+          repo_type: space
+          space_sdk: docker
